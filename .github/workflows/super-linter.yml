@@ -7,8 +7,6 @@
 name: Lint Code Base
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 jobs:
@@ -25,9 +23,3 @@ jobs:
         
       - name: Run ESLint
         run: npm run lint
-
-      - name: Run Prettier
-        uses: actionsx/prettier@v2
-        with:
-          # prettier CLI arguments.
-          args: --check .
