@@ -20,11 +20,14 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
-
+      - name: Install Dependencies
+        run: npm install
+        
       - name: Run ESLint
         run: eslint . --ext .js,.jsx,.ts,.tsx
 
-      - uses: actionsx/prettier@v2
+      - name: Run Prettier
+        uses: actionsx/prettier@v2
         with:
           # prettier CLI arguments.
           args: --check .
