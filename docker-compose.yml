@@ -4,7 +4,7 @@ volumes:
 services:
   postgres:
     container_name: backend-postgres
-    image: postgres:latest
+    image: postgres:14
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=postgrespw
