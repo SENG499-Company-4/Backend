@@ -5,6 +5,7 @@ jobs:
 
   label-when-approved:
     name: "Label when approved"
+    permissions: write-all
     runs-on: ubuntu-latest
     outputs:
       isApprovedByCommiters: ${{ steps.label-when-approved-by-commiters.outputs.isApproved }}
