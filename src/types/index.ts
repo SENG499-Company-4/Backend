@@ -1,1 +1,7 @@
-// TODO: Create types and export them here which can then be imported in `../schema.ts`
+export * from './User';
+export * from './Schedule';
+export * from './Term';
+export * from './Response';
+export * from './Error';
+export * from './Date';
+export * from './Course';
