@@ -1,0 +1,23 @@
+name: Lint Code Base
+
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  run-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Run ESLint
+        run: npm run lint
+
+      # TODO: Run tests when they are available
+      #- name: Run Tests
+      #  run: npm run test
