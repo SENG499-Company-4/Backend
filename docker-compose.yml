@@ -1,0 +1,26 @@
+volumes:
+  data:
+
+services:
+  postgres:
+    container_name: backend-postgres
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=postgrespw
+    ports:
+      - 5432:5432
+    volumes:
+      - data:/var/lib/postgresql
+
+  graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graphql
+    depends_on: 
+      - postgres
+    ports:
+      - "4000:4000"
+    restart: always
+
