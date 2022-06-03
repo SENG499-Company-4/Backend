@@ -1,3 +1,5 @@
+version: "2"
+
 volumes:
   data:
 
@@ -6,6 +8,7 @@ services:
     container_name: backend-postgres
     image: postgres:14
     environment:
+      - POSTGRES_DB=mydb
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=postgrespw
     ports:
@@ -23,4 +26,3 @@ services:
     ports:
       - "4000:4000"
     restart: always
-
