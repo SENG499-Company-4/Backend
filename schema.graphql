@@ -2,6 +2,225 @@
 ### Do not make changes to this file directly
 
 
+"""Returned when a user logs in our logs out."""
+type AuthPayload {
+  """Optional error message if success is false"""
+  message: String
+
+  """Whether auth operation was successful or not"""
+  success: Boolean!
+
+  """Auth token used for future requests"""
+  token: String!
+}
+
+input ChangeUserPasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+type CourseID {
+  """Course code, e.g. 499, 310"""
+  code: String!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
+
+  """Term course is offered in"""
+  term: Term!
+}
+
+type CoursePreference {
+  id: CourseID!
+  preference: Int!
+}
+
+"""
+A set of CourseSections with matching CourseID represent a course offering
+"""
+type CourseSection {
+  """The course identifier"""
+  CourseID: CourseID!
+
+  """Maximum capacity of the section"""
+  capacity: Int!
+
+  """The end date of the course"""
+  endDate: Date!
+
+  """How many hours per week a course takes"""
+  hoursPerWeek: Float!
+
+  """Days of the week the class is offered in - see Day"""
+  meetingTimes: [MeetingTime!]!
+
+  """Professor's info, if any professors are assigned"""
+  professors: [User!]
+
+  """The start date of the course"""
+  startDate: Date!
+}
+
+type CreateUserMutationResult {
+  message: String
+  password: String
+  success: Boolean!
+  username: String
+}
+
+scalar Date
+
+"""Days of the Week"""
+enum Day {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
+
+type Error {
+  errors: [Error!]
+  message: String!
+}
+
+input GenerateScheduleInput {
+  year: Int!
+}
+
+"""Weekday and time of a course section offering"""
+type MeetingTime {
+  """Weekday - see DayEnum"""
+  day: Day!
+
+  """End time"""
+  endTime: Date!
+
+  """Start time"""
+  startTime: Date!
+}
+
+type Mutation {
+  """Change the password of the currently logged in user"""
+  changeUserPassword(input: ChangeUserPasswordInput!): Response!
+
+  """Register a new user account"""
+  createUser(username: String!): CreateUserMutationResult!
+
+  """Generate schedule"""
+  generateSchedule(input: GenerateScheduleInput!): Response!
+
+  """Login into a user account using email and password"""
+  login(password: String!, username: String!): AuthPayload!
+
+  """Logout the currently logged in user"""
+  logout: AuthPayload!
+
+  """Reset a users password."""
+  resetPassword(id: ID!): ResetPasswordMutationResult!
+
+  """Updates a user given the user id."""
+  updateUser(input: UpdateUserInput!): UpdateUserMutationResult
+}
+
 type Query {
-  ok: Boolean!
+  """Get a list of courses for a given term"""
+  courses(term: Term): [CourseSection!]
+
+  """Find a user by their id"""
+  findUserById(id: ID!): User
+
+  """Get the current user"""
+  me: User
+
+  """
+  Schedule for a given term. If year is given, returns the most recent schedule generated for that year.
+  """
+  schedule(year: Int): Schedule
+
+  """Get Teaching Preference Survey"""
+  survey: TeachingPreferenceSurvey!
+}
+
+type ResetPasswordMutationResult {
+  """Optional error message"""
+  message: String
+
+  """New user password"""
+  password: String
+
+  """Whether the password was successfully reset"""
+  success: Boolean!
+}
+
+type Response {
+  message: String
+  success: Boolean!
+}
+
+"""User role"""
+enum Role {
+  """Administrator role (department staff etc.)"""
+  ADMIN
+
+  """User role (professor, student etc.)"""
+  USER
+}
+
+"""Generated schedule for a year"""
+type Schedule {
+  """Scheduled courses"""
+  courses(term: Term!): [CourseSection!]
+
+  """When the schedule was generated"""
+  createdAt: Date!
+
+  """ID of the schedule"""
+  id: ID!
+
+  """Year for the schedule"""
+  year: Int!
+}
+
+type TeachingPreferenceSurvey {
+  courses: [CourseID!]!
+}
+
+"""UVic Terms"""
+enum Term {
+  FALL
+  SPRING
+  SUMMER
+}
+
+input UpdateUserInput {
+  """ID of user to update"""
+  id: ID!
+}
+
+type UpdateUserMutationResult {
+  errors: [Error!]
+  user: User
+}
+
+type User {
+  """Determine if the user is marked active"""
+  active: Boolean!
+
+  """Unique User  ID"""
+  id: Int!
+
+  """Password"""
+  password: String!
+
+  """Teaching preferences"""
+  preferences: [CoursePreference!]
+
+  """role - see enum Role"""
+  role: Role!
+
+  """Username"""
+  username: String!
 }
