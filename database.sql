@@ -7,11 +7,10 @@ CREATE TYPE Term AS ENUM('FALL', 'SPRING', 'SUMMER');
 CREATE TYPE Peng AS ENUM('NOTREQUIRED', 'PREFERRED', 'REQUIRED');
 
 CREATE TABLE `Coefficients` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `subject` varchar(255) NOT NULL,
   `code` varchar(255) NOT NULL,
   `value` float[] NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`subject`,`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `User` (
