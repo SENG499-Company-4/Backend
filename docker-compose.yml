@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 
 volumes:
   data:
@@ -21,8 +21,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: graphql
-    depends_on: 
+    depends_on:
       - postgres
     ports:
-      - "4000:4000"
+      - '4000:4000'
     restart: always
