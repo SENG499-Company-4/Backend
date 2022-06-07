@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Peng {
+  NOTREQUIRED
+  PREFERRED
+  REQUIRED
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Term {
+  FALL
+  SPRING
+  SUMMER
+}
+
+enum Day {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
+
+model Coefficients {
+  subject String
+  code String
+  value Float[]
+  @@id([subject, code])
+}
+
+model Users {
+  id Int @id @default(autoincrement())
+  name String
+  password String
+  role Role @default(value: USER)
+  preferences Preferences[]
+  professorSettings ProfessorSettings[]
+}
+
+model Courses {
+  id Int @id @default(autoincrement())
+  subject String
+  code String
+  term Term
+  year Int
+  weeklyHours Float
+  capacity Int
+  startDate DateTime
+  endDate DateTime
+  peng Peng
+  meetingTimes MeetingTimes[]
+}
+
+model MeetingTimes {
+  id Int @id @default(autoincrement())
+  course Courses @relation(fields: [courseID], references: [id])
+  courseID Int
+  day Day
+  startTime DateTime
+  endTime DateTime
+  schedule Schedules @relation(fields: [scheduleID], references: [id])
+  scheduleID Int
+}
+
+model Schedules {
+  id Int @id @default(autoincrement())
+  year Int
+  createdAt DateTime
+  meetingTimes MeetingTimes[]
+}
+
+model Preferences {
+  user Users @relation(fields: [userID], references: [id])
+  userID Int
+  courseID Int
+  rank Int
+  @@id([userID, courseID])
+}
+
+model ProfessorSettings {
+  user Users @relation(fields: [userID], references: [id])
+  userID Int @id
+  year Int
+  maxCoursesFall Int
+  maxCoursesSpring Int
+  maxCoursesSummer Int
+}
