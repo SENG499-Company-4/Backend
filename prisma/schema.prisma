@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
 }
 
 datasource db {
@@ -37,65 +38,65 @@ enum Day {
   WEDNESDAY
 }
 
-model Coefficients {
+model Coefficient {
   subject String
   code String
   value Float[]
   @@id([subject, code])
 }
 
-model Users {
-  id Int @id @default(autoincrement())
-  name String
+model User {
+  id String @id
+  name String?
   password String
   role Role @default(value: USER)
-  preferences Preferences[]
+  preferences Preference[]
   professorSettings ProfessorSettings[]
 }
 
-model Courses {
-  id Int @id @default(autoincrement())
+model Course {
+  id String @id
   subject String
   code String
   term Term
   year Int
   weeklyHours Float
-  capacity Int
-  startDate DateTime
-  endDate DateTime
+  capacity Int?
+  startDate DateTime?
+  endDate DateTime?
   peng Peng
-  meetingTimes MeetingTimes[]
+  meetingTimes MeetingTime[]
 }
 
-model MeetingTimes {
-  id Int @id @default(autoincrement())
-  course Courses @relation(fields: [courseID], references: [id])
-  courseID Int
-  day Day
-  startTime DateTime
-  endTime DateTime
-  schedule Schedules @relation(fields: [scheduleID], references: [id])
-  scheduleID Int
+model MeetingTime {
+  id String @id
+  course Course @relation(fields: [courseID], references: [id])
+  courseID String
+  day Day?
+  startTime DateTime?
+  endTime DateTime?
+  schedule Schedule @relation(fields: [scheduleID], references: [id])
+  scheduleID String
 }
 
-model Schedules {
-  id Int @id @default(autoincrement())
+model Schedule {
+  id String @id
   year Int
   createdAt DateTime
-  meetingTimes MeetingTimes[]
+  meetingTimes MeetingTime[]
 }
 
-model Preferences {
-  user Users @relation(fields: [userID], references: [id])
-  userID Int
+model Preference {
+  user User @relation(fields: [userID], references: [id])
+  userID String
   courseID Int
-  rank Int
+  rank Int?
   @@id([userID, courseID])
 }
 
 model ProfessorSettings {
-  user Users @relation(fields: [userID], references: [id])
-  userID Int @id
+  user User @relation(fields: [userID], references: [id])
+  userID String @id
   year Int
   maxCoursesFall Int
   maxCoursesSpring Int
