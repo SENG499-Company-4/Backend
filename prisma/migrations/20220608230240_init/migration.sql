@@ -23,6 +23,7 @@ CREATE TABLE "Coefficient" (
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT,
+    "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT E'USER',
 
