@@ -8,4 +8,8 @@ export const schema = makeSchema({
     typegen: join(__dirname, '..', 'node_modules', '@types', 'nexus-typegen', 'index.d.ts'),
     schema: join(__dirname, '..', 'schema.graphql'),
   },
+  contextType: {
+    module: join(process.cwd(), './src/context.ts'), // 1
+    export: 'Context', // 2
+  },
 });
