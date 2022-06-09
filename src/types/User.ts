@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { arg, enumType, extendType, idArg, inputObjectType, nonNull, objectType, stringArg } from 'nexus';
 import { CoursePreference } from './Course/Preference';
 import { Error } from './Error';
@@ -89,7 +90,25 @@ export const UserMutation = extendType({
       type: CreateUserMutationResult,
       description: 'Register a new user account',
       args: {
-        username: nonNull(stringArg()),
+        name: stringArg({ description: 'Name of the user' }),
+        username: nonNull(stringArg({ description: 'Username for user' })),
+        password: nonNull(stringArg({ description: 'Password for user' })),
+        role: nonNull(Role),
+      },
+      resolve: async (_, args, ctx) => {
+        const { name, username, password, role } = args;
+        const { prisma } = ctx;
+        const newUser = await (prisma as PrismaClient).user.create({
+          data: {
+            id: username.toLowerCase().replace(' ', '-'),
+            name,
+            username,
+            password,
+            role,
+          },
+        });
+        if (!newUser) return { success: false, message: 'Could not create user' };
+        else return { success: true, message: 'User created' };
       },
     });
     t.nonNull.field('login', {
@@ -99,10 +118,32 @@ export const UserMutation = extendType({
         username: nonNull(stringArg()),
         password: nonNull(stringArg()),
       },
+      resolve: async (root, args, ctx) => {
+        const { username, password } = args;
+        const { prisma } = ctx;
+        const user = await (prisma as PrismaClient).user.findFirst({
+          where: {
+            username: username.toLowerCase(),
+            password,
+          },
+        });
+        if (!user) {
+          return {
+            success: false,
+            message: 'Invalid username or password',
+            token: '',
+          };
+        }
+        return {
+          success: true,
+          token: '',
+        };
+      },
     });
     t.nonNull.field('logout', {
       type: AuthPayload,
       description: 'Logout the currently logged in user',
+      resolve: () => ({ success: false, message: 'Not implemented', token: '' }),
     });
     t.field('updateUser', {
       type: UpdateUserMutationResult,
@@ -110,6 +151,7 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
+      resolve: () => ({}),
     });
     t.nonNull.field('changeUserPassword', {
       type: Response,
@@ -117,6 +159,21 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
+      resolve: () => ({ success: false, message: 'Not implemented' }),
+      // resolve: (_, args, ctx) => {
+      //   const { userID, newPassword } = args;
+      //   const { prisma } = ctx;
+      //   const user = (prisma as PrismaClient).user.update({
+      //     where: {
+      //       id: userID,
+      //     },
+      //     data: {
+      //       password: newPassword,
+      //     },
+      //   });
+      //   if (!user) return { success: false, message: 'Could not update password' };
+      //   else return { success: true, message: 'Password updated' };
+      // },
     });
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
@@ -124,6 +181,7 @@ export const UserMutation = extendType({
       args: {
         id: nonNull(idArg()),
       },
+      resolve: () => ({ success: false, message: 'Not implemented' }),
     });
   },
 });
