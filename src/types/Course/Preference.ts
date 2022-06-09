@@ -24,6 +24,7 @@ export const PreferenceQuery = extendType({
     t.nonNull.field('survey', {
       type: TeachingPreferenceSurvey,
       description: 'Get Teaching Preference Survey',
+      resolve: () => ({ courses: [] }),
     });
   },
 });
