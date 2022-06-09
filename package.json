@@ -11,7 +11,8 @@
     "lint:fix": "eslint --fix \"src/**/*.{t,j}s{x,}\"",
     "format": "prettier --write \"src/**/*.{t,j}s{x,}\"",
     "migrate": "npx prisma migrate dev --name init --preview-feature",
-    "prisma": "prisma generate"
+    "prisma": "prisma generate",
+    "schema": "ts-node --transpile-only src/schema.ts"
   },
   "repository": {
     "type": "git",
