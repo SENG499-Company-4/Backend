@@ -15,8 +15,8 @@ async function main() {
         year: courseObj.year,
         weeklyHours: courseObj.weeklyHours,
         capacity: courseObj.capacity,
-        startDate: courseObj.startDate,
-        endDate: courseObj.endDate,
+        startDate: new Date(courseObj.startDate),
+        endDate: new Date(courseObj.endDate),
         peng: courseObj.peng as Peng,
       },
     });
