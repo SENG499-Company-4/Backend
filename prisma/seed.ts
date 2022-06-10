@@ -1,10 +1,25 @@
 import { PrismaClient } from '@prisma/client';
-import * as courseData from './course_migration.json';
+import courseData from './course_migration.json';
 const prisma = new PrismaClient();
 
 async function main() {
-  for (const course of courseData) {
-    console.log(`Seeding ${course.subject}`);
+  let courseId = 0;
+  for (const courseObj of courseData) {
+    const newCourse = await (prisma as PrismaClient).course.create({
+      data: {
+        id: courseId.toString(),
+        subject: courseObj.subject,
+        code: courseObj.code,
+        term: courseObj.term as unknown as Term,
+        year: courseObj.year,
+        weeklyHours: courseObj.weeklyHours,
+        capacity: courseObj.capacity,
+        startDate: courseObj.startDate,
+        endDate: courseObj.endDate,
+        peng: courseObj.peng,
+      },
+    });
+    courseId++;
   }
 }
 
