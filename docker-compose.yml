@@ -14,7 +14,12 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - data:/var/lib/postgresql
+      - ./data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U admin']
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   graphql:
     build:
@@ -22,7 +27,8 @@ services:
       dockerfile: Dockerfile
     container_name: graphql
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - '4000:4000'
     restart: always
