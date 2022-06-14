@@ -11,15 +11,6 @@ CREATE TYPE "Term" AS ENUM ('FALL', 'SPRING', 'SUMMER');
 CREATE TYPE "Day" AS ENUM ('FRIDAY', 'MONDAY', 'SATURDAY', 'SUNDAY', 'THURSDAY', 'TUESDAY', 'WEDNESDAY');
 
 -- CreateTable
-CREATE TABLE "Coefficient" (
-    "subject" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "value" DOUBLE PRECISION[],
-
-    CONSTRAINT "Coefficient_pkey" PRIMARY KEY ("subject","code")
-);
-
--- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT,
