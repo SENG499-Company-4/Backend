@@ -1,4 +1,4 @@
-FROM node:14.19.3
+FROM node:17
 
 LABEL version="1.0"
 LABEL description="Base docker image for Node backend"

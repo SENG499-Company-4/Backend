@@ -13,7 +13,8 @@
     "migrate": "npx prisma migrate dev --name init --preview-feature",
     "deploy": "npx prisma migrate deploy",
     "prisma": "prisma generate",
-    "schema": "ts-node --transpile-only src/schema.ts"
+    "schema": "ts-node --transpile-only src/schema.ts",
+    "seed": "prisma db seed"
   },
   "repository": {
     "type": "git",
