@@ -13,8 +13,4 @@ EXPOSE 4000
 
 RUN npm run build
 RUN npm run prisma
-
-CMD ["npm", "run", "deploy"] 
-ENTRYPOINT ["/usr/local/bin/npm", "run", "dev"]
-
-# CMD ["./wait-for-it.sh", "backend-postgres:5432", "--", "npm", "run", "migrate", "&&", "npm", "run", "dev"]
+ENTRYPOINT ["./setup.sh"]
