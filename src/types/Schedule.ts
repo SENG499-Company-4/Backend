@@ -37,6 +37,7 @@ export const ScheduleMutation = extendType({
       args: {
         input: arg({ type: nonNull(GenerateScheduleInput) }),
       },
+      resolve: () => ({ success: false, message: 'Not implemented' }),
     });
   },
 });

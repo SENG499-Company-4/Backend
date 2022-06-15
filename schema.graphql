@@ -107,7 +107,17 @@ type Mutation {
   changeUserPassword(input: ChangeUserPasswordInput!): Response!
 
   """Register a new user account"""
-  createUser(username: String!): CreateUserMutationResult!
+  createUser(
+    """Name of the user"""
+    name: String
+
+    """Password for user"""
+    password: String!
+    role: Role!
+
+    """Username for user"""
+    username: String!
+  ): CreateUserMutationResult!
 
   """Generate schedule"""
   generateSchedule(input: GenerateScheduleInput!): Response!

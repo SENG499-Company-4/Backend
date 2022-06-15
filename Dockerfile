@@ -5,12 +5,12 @@ LABEL description="Base docker image for Node backend"
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json", "./"]
+COPY . .
 
 RUN npm install --production
 
-COPY . .
-
 EXPOSE 4000
 
-CMD ["npm", "run", "dev"]
+RUN npm run build
+RUN npm run prisma
+ENTRYPOINT ["./setup.sh"]
