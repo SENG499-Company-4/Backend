@@ -28,6 +28,9 @@ type CourseID {
 
   """Term course is offered in"""
   term: Term!
+
+  """Year course is offered in"""
+  year: Int!
 }
 
 type CoursePreference {
@@ -137,7 +140,7 @@ type Mutation {
 
 type Query {
   """Get a list of courses for a given term"""
-  courses(term: Term): [CourseSection!]
+  courses(term: Term, year: Int): [CourseSection!]
 
   """Find a user by their id"""
   findUserById(id: ID!): User

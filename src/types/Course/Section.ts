@@ -1,9 +1,13 @@
-import { arg, extendType, objectType } from 'nexus';
+import { Course, PrismaClient } from '@prisma/client';
+import { arg, extendType, objectType, list } from 'nexus';
 import { Date } from '../Date';
 import { Term } from '../Term';
 import { User } from '../User';
 import { CourseID } from './ID';
 import { MeetingTime } from './MeetingTime';
+
+
+const prisma = new PrismaClient();
 
 export const CourseSection = objectType({
   name: 'CourseSection',
@@ -32,11 +36,72 @@ export const CourseQuery = extendType({
   type: 'Query',
   definition(t) {
     t.list.nonNull.field('courses', {
-      type: CourseSection,
+      // type is a list of coursesections
+      type: list(CourseSection),
       description: 'Get a list of courses for a given term',
       args: {
         term: arg({ type: Term }),
+        year: arg({ type: 'Int' }),
       },
+      resolve: async (_, args, ctx) => {
+        const { term, year } = args;
+        const { prisma } = ctx;
+        
+        let courses: Course[] = [];
+        let courseSections: typeof CourseSection[] = [];
+        // if term and year are provided, get courses for that term
+        if (term && year){
+          courses = await (prisma as PrismaClient).course.findMany({
+            where: {
+              term: term,
+              year: year,
+            },
+          });
+
+        }
+        else if (term){
+          courses = await (prisma as PrismaClient).course.findMany({
+            where: {
+              term: term,
+            },
+          });
+        }
+        else if (year){
+          courses = await (prisma as PrismaClient).course.findMany({
+            where: {
+              year: year,
+            },
+          });
+        }
+        else {
+          courses = await (prisma as PrismaClient).course.findMany();
+        }
+        // Get meeting times for each course
+        for (const course of courses) {
+          const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
+            where: {
+              course: {
+                id: course.id,
+              },
+            }
+            });
+          //   courseSections.push({
+          //     CourseID: {
+          //       subject: course.subject,
+          //       code: course.code,
+          //       term: course.term,
+          //       year: course.year,
+          //     },
+          //     hoursPerWeek: course.weeklyHours,
+          //     capacity: course.capacity,
+          //     professors: course.peng,
+          //     startDate: course.startDate,
+          //     endDate: course.endDate,
+          //     meetingTimes: 
+          // });
+        }
+        return courseSections;
+    }
     });
   },
 });

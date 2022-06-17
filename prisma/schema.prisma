@@ -46,6 +46,7 @@ model User {
   role Role @default(value: USER)
   preferences Preference[]
   professorSettings ProfessorSettings[]
+  meetingTimes MeetingTime[]
 }
 
 model Course {
@@ -67,6 +68,8 @@ model MeetingTime {
   course Course @relation(fields: [courseID], references: [id])
   courseID String
   day Day?
+  professor User @relation(fields: [professorUsername], references: [username])
+  professorUsername String 
   startTime DateTime?
   endTime DateTime?
   schedule Schedule @relation(fields: [scheduleID], references: [id])
