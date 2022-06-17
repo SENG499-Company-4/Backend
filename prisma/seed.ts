@@ -22,18 +22,15 @@ async function main() {
     });
     courseId++;
   }
-  let userId = 0;
   for (const userObj of userData) {
     await (prisma as PrismaClient).user.create({
       data: {
-        id: userId.toString(),
         name: userObj.name,
         username: userObj.username,
         password: userObj.password,
         role: userObj.role as Role,
       },
     });
-    userId++;
   }
 }
 
