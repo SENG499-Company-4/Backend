@@ -48,7 +48,8 @@ export const CourseQuery = extendType({
         const { prisma } = ctx;
         
         let courses: Course[] = [];
-        let courseSections: typeof CourseSection[]  = [];
+        let courseSections: any  = [];
+
         // if term and year are provided, get courses for that term
         if (term && year){
           courses = await (prisma as PrismaClient).course.findMany({
@@ -86,38 +87,21 @@ export const CourseQuery = extendType({
               },
             }
             });
-            
-         courseSections.push({
-          courseID: {
-              subject: course.subject,
-              code: course.code,
-              term: course.term,
-              year: course.year
-            },
-            hoursPerWeek: course.weeklyHours,
-            capacity: course.capacity,
-            professors: course.professorUsername,
-            startDate: course.startDate,
-            endDate: course.endDate,
-            meetingTimes: meetingTimes,
-         }
-        );
+            courseSections.push({
+              CourseID: {
+                subject: course.subject,
+                code: course.code,
+                term: course.term,
+                year: course.year
+              },
+              hoursPerWeek: course.weeklyHours,
+              capacity: course.capacity,
+              professors: course.professorUsername,
+              startDate: course.startDate,
+              endDate: course.endDate,
+              meetingTimes: meetingTimes,
+            });
         }
-        // Build CourseSection objects
-        // courseSections = courses.map(course => ({
-        //   CourseID: {
-        //     subject: course.subject,
-        //     code: course.code,
-        //     term: course.term,
-        //     year: course.year
-        //   },
-        //   hoursPerWeek: course.weeklyHours,
-        //   capacity: course.capacity,
-        //   professors: course.professor,
-        //   startDate: course.startDate,
-        //   endDate: course.endDate,
-        //   meetingTimes: course.meetingTimes
-        // }));
 
         return courseSections;
     }
