@@ -1,13 +1,10 @@
 import { Course, PrismaClient } from '@prisma/client';
-import { arg, extendType, objectType, list } from 'nexus';
+import { arg, extendType, objectType } from 'nexus';
 import { Date } from '../Date';
 import { Term } from '../Term';
 import { User } from '../User';
 import { CourseID } from './ID';
 import { MeetingTime } from './MeetingTime';
-
-
-const prisma = new PrismaClient();
 
 export const CourseSection = objectType({
   name: 'CourseSection',
