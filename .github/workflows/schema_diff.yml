@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  run-lint:
+  schema-diff:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Company 4 Schema
