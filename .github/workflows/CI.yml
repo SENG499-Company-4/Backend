@@ -1,4 +1,4 @@
-name: Lint Code Base
+name: CI
 
 on:
   pull_request:
@@ -17,6 +17,20 @@ jobs:
         
       - name: Run ESLint
         run: npm run lint
+
+  schema-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Company 4 Schema
+        uses: actions/checkout@v3
+      - name: Clone Company 3 Schema
+        run: git clone https://github.com/SENG499-S22-Company3/shared.git
+      - name: Sort Schema files
+        run: |
+          sort schema.graphql | tr -d "[:blank:]" | grep "\S" > c4schema.graphql
+          sort shared/graphql/schema.graphql | tr -d "[:blank:]" | grep "\S" > c3schema.graphql
+      - name: Compare Files
+        run: diff c3schema.graphql c4schema.graphql
 
       # TODO: Run tests when they are available
       #- name: Run Tests
