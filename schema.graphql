@@ -209,9 +209,6 @@ input UpdateUserInput {
   """New active status of user"""
   active: Boolean
 
-  """ID of user to update"""
-  id: ID!
-
   """New name of user"""
   name: String
 

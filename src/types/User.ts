@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import { compare } from 'bcrypt';
 import { arg, enumType, extendType, idArg, inputObjectType, nonNull, objectType, stringArg } from 'nexus';
+import generateHashPassword from '../utils/hash';
 import { CoursePreference } from './Course/Preference';
-import { Error } from './Error';
+import { Error as NexusError } from './Error';
 import { Response } from './Response';
 
 export const AuthPayload = objectType({
@@ -17,6 +19,7 @@ export const AuthPayload = objectType({
 export const ChangeUserPasswordInput = inputObjectType({
   name: 'ChangeUserPasswordInput',
   definition(t) {
+    t.nonNull.string('username', { description: 'Username of user to change password for' });
     t.nonNull.string('currentPassword');
     t.nonNull.string('newPassword');
   },
@@ -53,7 +56,10 @@ export const Role = enumType({
 export const UpdateUserInput = inputObjectType({
   name: 'UpdateUserInput',
   definition(t) {
-    t.nonNull.id('id', { description: 'ID of user to update' });
+    t.string('username', { description: 'New username of user' });
+    t.string('name', { description: 'New name of user' });
+    t.field('role', { type: Role, description: 'New role of user' });
+    t.boolean('active', { description: 'New active status of user' });
   },
 });
 
@@ -61,15 +67,25 @@ export const UpdateUserMutationResult = objectType({
   name: 'UpdateUserMutationResult',
   definition(t) {
     t.field('user', { type: User });
-    t.list.nonNull.field('errors', { type: Error });
+    t.list.nonNull.field('errors', { type: NexusError });
+  },
+});
+
+export const CreateUserInput = inputObjectType({
+  name: 'CreateUserInput',
+  definition(t) {
+    t.string('name');
+    t.nonNull.string('username');
+    t.nonNull.string('password');
+    t.nonNull.field('role', { type: Role });
   },
 });
 
 export const User = objectType({
   name: 'User',
   definition(t) {
-    t.nonNull.int('id', { description: 'Unique User  ID' });
     t.nonNull.string('username', { description: 'Username' });
+    t.string('name', { description: 'Name of the user' });
     t.nonNull.string('password', { description: 'Password' });
     t.nonNull.field('role', {
       type: Role,
@@ -90,23 +106,29 @@ export const UserMutation = extendType({
       type: CreateUserMutationResult,
       description: 'Register a new user account',
       args: {
-        name: stringArg({ description: 'Name of the user' }),
-        username: nonNull(stringArg({ description: 'Username for user' })),
-        password: nonNull(stringArg({ description: 'Password for user' })),
-        role: nonNull(Role),
+        input: arg({ type: nonNull(CreateUserInput) }),
       },
-      resolve: async (_, args, ctx) => {
-        const { name, username, password, role } = args;
-        const { prisma } = ctx;
-        const newUser = await (prisma as PrismaClient).user.create({
+      resolve: async (_, args, { prisma }) => {
+        const { name, username, password, role } = args.input;
+        const userExists = await prisma.user.findFirst({ where: { username } });
+        if (userExists) {
+          return {
+            success: false,
+            message: 'User already exists',
+          };
+        }
+
+        const hashPwd = await generateHashPassword(password);
+
+        const newUser = await prisma.user.create({
           data: {
-            id: username.toLowerCase().replace(' ', '-'),
             name,
             username,
-            password,
+            password: hashPwd,
             role,
           },
         });
+
         if (!newUser) return { success: false, message: 'Could not create user' };
         else return { success: true, message: 'User created' };
       },
@@ -151,7 +173,20 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
-      resolve: () => ({}),
+      resolve: async (_, args, { prisma }) => {
+        const { username, name, role, active } = args.input;
+        const user = await prisma.user.update({
+          where: { username: username ?? undefined },
+          data: {
+            username: username ?? undefined,
+            name,
+            role: role ?? undefined,
+            active: active ?? undefined,
+          },
+        });
+        if (user) return { user };
+        else return { errors: [{ message: 'Could not update user' }] };
+      },
     });
     t.nonNull.field('changeUserPassword', {
       type: Response,
@@ -159,21 +194,32 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
-      resolve: () => ({ success: false, message: 'Not implemented' }),
-      // resolve: (_, args, ctx) => {
-      //   const { userID, newPassword } = args;
-      //   const { prisma } = ctx;
-      //   const user = (prisma as PrismaClient).user.update({
-      //     where: {
-      //       id: userID,
-      //     },
-      //     data: {
-      //       password: newPassword,
-      //     },
-      //   });
-      //   if (!user) return { success: false, message: 'Could not update password' };
-      //   else return { success: true, message: 'Password updated' };
-      // },
+      resolve: async (_, args, { prisma }) => {
+        const { username, currentPassword, newPassword } = args.input;
+
+        const user = await (prisma as PrismaClient).user.findUnique({
+          where: { username },
+        });
+
+        if (!user) return { success: false, message: 'User not found' };
+
+        const isValid = await compare(currentPassword, user.password);
+
+        if (!isValid) throw new Error('Invalid password');
+
+        const hashPwd = await generateHashPassword(newPassword);
+
+        await (prisma as PrismaClient).user.update({
+          where: {
+            username,
+          },
+          data: {
+            password: hashPwd,
+          },
+        });
+
+        return { success: true, message: 'Password updated' };
+      },
     });
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
