@@ -28,7 +28,6 @@ async function main() {
         startDate: new Date(courseObj.startDate),
         endDate: new Date(courseObj.endDate),
         peng: courseObj.peng as Peng,
-        // professorUsername: 'msima',
       },
     });
     courseId++;
