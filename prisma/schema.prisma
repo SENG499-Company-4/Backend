@@ -45,6 +45,7 @@ model User {
   role Role @default(value: USER)
   preferences Preference[]
   professorSettings ProfessorSettings[]
+  courses Course[]
   active Boolean @default(value: true)
 }
 
@@ -60,6 +61,8 @@ model Course {
   endDate DateTime?
   peng Peng
   meetingTimes MeetingTime[]
+  professor User @relation(fields: [professorUsername], references: [username])
+  professorUsername String @default(value: "msima")
 }
 
 model MeetingTime {
