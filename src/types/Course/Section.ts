@@ -37,7 +37,7 @@ export const CourseQuery = extendType({
   definition(t) {
     t.list.nonNull.field('courses', {
       // type is a list of coursesections
-      type: list(CourseSection),
+      type: CourseSection,
       description: 'Get a list of courses for a given term',
       args: {
         term: arg({ type: Term }),
@@ -48,7 +48,7 @@ export const CourseQuery = extendType({
         const { prisma } = ctx;
         
         let courses: Course[] = [];
-        let courseSections: typeof CourseSection[] = [];
+        let courseSections: typeof CourseSection[]  = [];
         // if term and year are provided, get courses for that term
         if (term && year){
           courses = await (prisma as PrismaClient).course.findMany({
@@ -76,6 +76,7 @@ export const CourseQuery = extendType({
         else {
           courses = await (prisma as PrismaClient).course.findMany();
         }
+        console.log(courses);
         // Get meeting times for each course
         for (const course of courses) {
           const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
@@ -85,21 +86,39 @@ export const CourseQuery = extendType({
               },
             }
             });
-          //   courseSections.push({
-          //     CourseID: {
-          //       subject: course.subject,
-          //       code: course.code,
-          //       term: course.term,
-          //       year: course.year,
-          //     },
-          //     hoursPerWeek: course.weeklyHours,
-          //     capacity: course.capacity,
-          //     professors: course.peng,
-          //     startDate: course.startDate,
-          //     endDate: course.endDate,
-          //     meetingTimes: 
-          // });
+            
+         courseSections.push({
+          courseID: {
+              subject: course.subject,
+              code: course.code,
+              term: course.term,
+              year: course.year
+            },
+            hoursPerWeek: course.weeklyHours,
+            capacity: course.capacity,
+            professors: course.professorUsername,
+            startDate: course.startDate,
+            endDate: course.endDate,
+            meetingTimes: meetingTimes,
+         }
+        );
         }
+        // Build CourseSection objects
+        // courseSections = courses.map(course => ({
+        //   CourseID: {
+        //     subject: course.subject,
+        //     code: course.code,
+        //     term: course.term,
+        //     year: course.year
+        //   },
+        //   hoursPerWeek: course.weeklyHours,
+        //   capacity: course.capacity,
+        //   professors: course.professor,
+        //   startDate: course.startDate,
+        //   endDate: course.endDate,
+        //   meetingTimes: course.meetingTimes
+        // }));
+
         return courseSections;
     }
     });

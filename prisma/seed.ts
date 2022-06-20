@@ -5,6 +5,16 @@ const prisma = new PrismaClient();
 
 async function main() {
   let courseId = 0;
+  for (const userObj of userData) {
+    await (prisma as PrismaClient).user.create({
+      data: {
+        name: userObj.name,
+        username: userObj.username,
+        password: userObj.password,
+        role: userObj.role as Role,
+      },
+    });
+  }
   for (const courseObj of courseData) {
     await (prisma as PrismaClient).course.create({
       data: {
@@ -18,19 +28,10 @@ async function main() {
         startDate: new Date(courseObj.startDate),
         endDate: new Date(courseObj.endDate),
         peng: courseObj.peng as Peng,
+        // professorUsername: 'msima',
       },
     });
     courseId++;
-  }
-  for (const userObj of userData) {
-    await (prisma as PrismaClient).user.create({
-      data: {
-        name: userObj.name,
-        username: userObj.username,
-        password: userObj.password,
-        role: userObj.role as Role,
-      },
-    });
   }
 }
 
