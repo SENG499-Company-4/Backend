@@ -39,13 +39,14 @@ enum Day {
 }
 
 model User {
-  id String @id
+  username String @id
   name String?
-  username String
   password String
   role Role @default(value: USER)
   preferences Preference[]
   professorSettings ProfessorSettings[]
+  courses Course[]
+  active Boolean @default(value: true)
 }
 
 model Course {
@@ -60,6 +61,8 @@ model Course {
   endDate DateTime?
   peng Peng
   meetingTimes MeetingTime[]
+  professor User @relation(fields: [professorUsername], references: [username])
+  professorUsername String @default(value: "msima")
 }
 
 model MeetingTime {
@@ -81,16 +84,16 @@ model Schedule {
 }
 
 model Preference {
-  user User @relation(fields: [userID], references: [id])
-  userID String
+  user User @relation(fields: [username], references: [username])
+  username String
   courseID Int
   rank Int?
-  @@id([userID, courseID])
+  @@id([username, courseID])
 }
 
 model ProfessorSettings {
-  user User @relation(fields: [userID], references: [id])
-  userID String @id
+  user User @relation(fields: [username], references: [username])
+  username String @id
   year Int
   maxCoursesFall Int
   maxCoursesSpring Int

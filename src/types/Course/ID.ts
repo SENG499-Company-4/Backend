@@ -10,5 +10,6 @@ export const CourseID = objectType({
       type: Term,
       description: 'Term course is offered in',
     });
+    t.nonNull.int('year', { description: 'Year course is offered in' });
   },
 });
