@@ -63,7 +63,7 @@ model Course {
   peng Peng
   meetingTimes MeetingTime[]
   professor User @relation(fields: [professorId], references: [id])
-  professorId Int @default(value: 0)
+  professorId Int @default(value: 35)
 }
 
 model MeetingTime {

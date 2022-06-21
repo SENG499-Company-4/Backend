@@ -4,6 +4,16 @@ import userData from './user_seed.json';
 const prisma = new PrismaClient();
 
 async function main() {
+  for (const userObj of userData) {
+    await (prisma as PrismaClient).user.create({
+      data: {
+        name: userObj.name,
+        username: userObj.username,
+        password: userObj.password,
+        role: userObj.role as Role,
+      },
+    });
+  }
   for (const courseObj of courseData) {
     await (prisma as PrismaClient).course.create({
       data: {
@@ -18,16 +28,6 @@ async function main() {
         peng: courseObj.peng as Peng,
       },
     });
-    for (const userObj of userData) {
-      await (prisma as PrismaClient).user.create({
-        data: {
-          name: userObj.name,
-          username: userObj.username,
-          password: userObj.password,
-          role: userObj.role as Role,
-        },
-      });
-    }
   }
 }
 
