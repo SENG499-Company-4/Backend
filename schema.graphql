@@ -28,6 +28,9 @@ type CourseID {
 
   """Term course is offered in"""
   term: Term!
+
+  """Year course is offered in"""
+  year: Int!
 }
 
 type CoursePreference {
