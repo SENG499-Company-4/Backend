@@ -39,7 +39,8 @@ enum Day {
 }
 
 model User {
-  username String @id
+  id Int @id @default(autoincrement())
+  username String
   name String?
   password String
   role Role @default(value: USER)
@@ -50,7 +51,7 @@ model User {
 }
 
 model Course {
-  id String @id
+  id Int @id @default(autoincrement())
   subject String
   code String
   term Term
@@ -61,39 +62,39 @@ model Course {
   endDate DateTime?
   peng Peng
   meetingTimes MeetingTime[]
-  professor User @relation(fields: [professorUsername], references: [username])
-  professorUsername String @default(value: "msima")
+  professor User @relation(fields: [professorId], references: [id])
+  professorId Int @default(value: 0)
 }
 
 model MeetingTime {
-  id String @id
+  id Int @id @default(autoincrement())
   course Course @relation(fields: [courseID], references: [id])
-  courseID String
+  courseID Int
   day Day?
   startTime DateTime?
   endTime DateTime?
   schedule Schedule @relation(fields: [scheduleID], references: [id])
-  scheduleID String
+  scheduleID Int
 }
 
 model Schedule {
-  id String @id
+  id Int @id @default(autoincrement())
   year Int
   createdAt DateTime
   meetingTimes MeetingTime[]
 }
 
 model Preference {
-  user User @relation(fields: [username], references: [username])
-  username String
+  user User @relation(fields: [userID], references: [id])
+  userID Int
   courseID Int
   rank Int?
-  @@id([username, courseID])
+  @@id([userID, courseID])
 }
 
 model ProfessorSettings {
-  user User @relation(fields: [username], references: [username])
-  username String @id
+  user User @relation(fields: [userID], references: [id])
+  userID Int @id
   year Int
   maxCoursesFall Int
   maxCoursesSpring Int
