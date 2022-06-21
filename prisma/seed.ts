@@ -1,17 +1,15 @@
 import { PrismaClient, Term, Peng, Role } from '@prisma/client';
-import generateHashPassword from '../src/utils/hash';
 import courseData from './course_migration.json';
 import userData from './user_seed.json';
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPwd = await generateHashPassword('123456789');
   for (const userObj of userData) {
     await (prisma as PrismaClient).user.create({
       data: {
         name: userObj.name,
         username: userObj.username,
-        password: hashedPwd,
+        password: '$2b$10$tDsA4Ts.DSi4Ry9DoxxQHOS.5ethLRqEFsCO9shyPDefKNaQYXahS',
         role: userObj.role as Role,
       },
     });
