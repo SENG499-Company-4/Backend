@@ -4,7 +4,6 @@ import userData from './static/users.json';
 const prisma = new PrismaClient();
 
 async function main() {
-  let courseId = 0;
   for (const userObj of userData) {
     await (prisma as PrismaClient).user.create({
       data: {
@@ -18,7 +17,6 @@ async function main() {
   for (const courseObj of courseData) {
     await (prisma as PrismaClient).course.create({
       data: {
-        id: courseId.toString(),
         subject: courseObj.subject,
         code: courseObj.code,
         term: courseObj.term as Term,
@@ -30,7 +28,6 @@ async function main() {
         peng: courseObj.peng as Peng,
       },
     });
-    courseId++;
   }
 }
 
