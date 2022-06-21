@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { arg, enumType, extendType, idArg, inputObjectType, nonNull, objectType, stringArg } from 'nexus';
+import { arg, enumType, extendType, idArg, inputObjectType, intArg, nonNull, objectType, stringArg } from 'nexus';
 import { CoursePreference } from './Course/Preference';
 import { Error } from './Error';
 import { Response } from './Response';
@@ -197,7 +197,14 @@ export const UserQuery = extendType({
       type: User,
       description: 'Find a user by their id',
       args: {
-        id: nonNull(idArg()),
+        id: nonNull(intArg()),
+      },
+      resolve: async (_, { id }, { prisma }) => {
+        return await (prisma as PrismaClient).user.findUnique({
+          where: {
+            id,
+          },
+        });
       },
     });
   },
