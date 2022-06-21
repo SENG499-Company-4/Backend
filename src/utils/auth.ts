@@ -1,0 +1,25 @@
+import { sign, verify } from 'jsonwebtoken';
+
+interface Token {
+  userId: string;
+}
+
+export const generateToken = (userId: string) => {
+  const token = sign(
+    {
+      userId,
+    },
+    process.env.JWT_SECRET || '',
+    {
+      expiresIn: '7d',
+    }
+  );
+  return token;
+};
+
+export const getUserId = (token?: string) => {
+  if (token) {
+    const user = verify(token, process.env.JWT_SECRET ?? '') as Token;
+    return user && user.userId;
+  }
+};
