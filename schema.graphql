@@ -231,6 +231,9 @@ type User {
   """Determine if the user is marked active"""
   active: Boolean!
 
+  """User id"""
+  id: Int!
+
   """Name of the user"""
   name: String
 
