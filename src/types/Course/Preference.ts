@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { arg, extendType, objectType } from 'nexus';
 import { CourseID } from './ID';
-// import { User } from '../User';
 
 export const CoursePreference = objectType({
   name: 'CoursePreference',
