@@ -1,6 +1,6 @@
 import { PrismaClient, Term, Peng, Role } from '@prisma/client';
-import courseData from './course_migration.json';
-import userData from './user_seed.json';
+import courseData from './static/courses.json';
+import userData from './static/users.json';
 const prisma = new PrismaClient();
 
 async function main() {
