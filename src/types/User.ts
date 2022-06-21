@@ -70,7 +70,7 @@ export const UpdateUserMutationResult = objectType({
 export const User = objectType({
   name: 'User',
   definition(t) {
-    t.nonNull.id('id', { description: 'Unique User  ID' });
+    t.nonNull.int('id', { description: 'Unique User  ID' });
     t.nonNull.string('username', { description: 'Username' });
     t.nonNull.string('password', { description: 'Password' });
     t.nonNull.field('role', {
@@ -83,10 +83,6 @@ export const User = objectType({
     });
     t.nonNull.boolean('active', {
       description: 'Determine if the user is marked active',
-      resolve() {
-        // TODO: return what's stored in the db (currently no table for active)
-        return true;
-      },
     });
   },
 });
@@ -108,7 +104,6 @@ export const UserMutation = extendType({
         const { prisma } = ctx;
         const newUser = await (prisma as PrismaClient).user.create({
           data: {
-            id: username.toLowerCase().replace(' ', '-'),
             name,
             username,
             password,

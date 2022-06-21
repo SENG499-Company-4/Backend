@@ -4,7 +4,7 @@ interface Token {
   userId: string;
 }
 
-export const generateToken = (userId: string) => {
+export const generateToken = (userId: number) => {
   const token = sign(
     {
       userId,
@@ -20,6 +20,6 @@ export const generateToken = (userId: string) => {
 export const getUserId = (token?: string) => {
   if (token) {
     const user = verify(token, process.env.JWT_SECRET ?? '') as Token;
-    return user && user.userId;
+    return user && Number(user.userId);
   }
 };

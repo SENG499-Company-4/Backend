@@ -223,7 +223,7 @@ type User {
   active: Boolean!
 
   """Unique User  ID"""
-  id: ID!
+  id: Int!
 
   """Password"""
   password: String!
