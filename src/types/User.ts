@@ -127,7 +127,7 @@ export const UserMutation = extendType({
         });
 
         if (!newUser) return { success: false, message: 'Could not create user' };
-        else return { success: true, message: 'User created' };
+        return { success: true, message: 'User created' };
       },
     });
     t.nonNull.field('login', {
@@ -180,8 +180,8 @@ export const UserMutation = extendType({
           },
         });
 
-        if (user) return { user };
-        else return { errors: [{ message: 'Could not update user' }] };
+        if (!user) return { errors: [{ message: 'Could not update user' }] };
+        return { user };
       },
     });
     t.nonNull.field('changeUserPassword', {
@@ -198,7 +198,7 @@ export const UserMutation = extendType({
         if (!user) return { success: false, message: 'User not found' };
 
         const isValid = await compare(currentPassword, user.password);
-        if (!isValid) throw new Error('Invalid password');
+        if (!isValid) return { success: false, message: 'Invalid current password' };
 
         await (prisma as PrismaClient).user.update({
           where: {
