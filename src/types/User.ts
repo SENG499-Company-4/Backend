@@ -84,6 +84,7 @@ export const CreateUserInput = inputObjectType({
 export const User = objectType({
   name: 'User',
   definition(t) {
+    t.nonNull.int('id', { description: 'User id' });
     t.nonNull.string('username', { description: 'Username' });
     t.string('name', { description: 'Name of the user' });
     t.nonNull.string('password', { description: 'Password' });
@@ -108,23 +109,19 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(CreateUserInput) }),
       },
-      resolve: async (_, args, { prisma }) => {
-        const { name, username, password, role } = args.input;
-        const userExists = await prisma.user.findFirst({ where: { username } });
-        if (userExists) {
+      resolve: async (_, { input: { name, username, password, role } }, { prisma }) => {
+        if (await prisma.user.findFirst({ where: { username } })) {
           return {
             success: false,
             message: 'User already exists',
           };
         }
 
-        const hashPwd = await generateHashPassword(password);
-
         const newUser = await prisma.user.create({
           data: {
             name,
             username,
-            password: hashPwd,
+            password: await generateHashPassword(password),
             role,
           },
         });
@@ -173,8 +170,7 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
-      resolve: async (_, args, { prisma }) => {
-        const { id, name, role, active } = args.input;
+      resolve: async (_, { input: { id, name, role, active } }, { prisma }) => {
         const user = await prisma.user.update({
           where: { id },
           data: {
@@ -183,6 +179,7 @@ export const UserMutation = extendType({
             active: active ?? undefined,
           },
         });
+
         if (user) return { user };
         else return { errors: [{ message: 'Could not update user' }] };
       },
@@ -193,9 +190,7 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
-      resolve: async (_, args, { prisma }) => {
-        const { id, currentPassword, newPassword } = args.input;
-
+      resolve: async (_, { input: { id, currentPassword, newPassword } }, { prisma }) => {
         const user = await (prisma as PrismaClient).user.findUnique({
           where: { id },
         });
@@ -203,17 +198,14 @@ export const UserMutation = extendType({
         if (!user) return { success: false, message: 'User not found' };
 
         const isValid = await compare(currentPassword, user.password);
-
         if (!isValid) throw new Error('Invalid password');
-
-        const hashPwd = await generateHashPassword(newPassword);
 
         await (prisma as PrismaClient).user.update({
           where: {
             id,
           },
           data: {
-            password: hashPwd,
+            password: await generateHashPassword(newPassword),
           },
         });
 
