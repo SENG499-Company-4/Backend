@@ -14,7 +14,7 @@
     "deploy": "npx prisma migrate deploy",
     "prisma": "prisma generate",
     "schema": "ts-node --transpile-only src/schema.ts",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed --reset"
   },
   "repository": {
     "type": "git",
