@@ -9,7 +9,7 @@ async function main() {
       data: {
         name: userObj.name,
         username: userObj.username,
-        password: '$2b$10$tDsA4Ts.DSi4Ry9DoxxQHOS.5ethLRqEFsCO9shyPDefKNaQYXahS',
+        password: userObj.password,
         role: userObj.role as Role,
       },
     });
