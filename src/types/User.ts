@@ -19,7 +19,7 @@ export const AuthPayload = objectType({
 export const ChangeUserPasswordInput = inputObjectType({
   name: 'ChangeUserPasswordInput',
   definition(t) {
-    t.nonNull.string('username', { description: 'Username of user to change password for' });
+    t.nonNull.int('id', { description: 'ID of user to change password for' });
     t.nonNull.string('currentPassword');
     t.nonNull.string('newPassword');
   },
@@ -56,7 +56,7 @@ export const Role = enumType({
 export const UpdateUserInput = inputObjectType({
   name: 'UpdateUserInput',
   definition(t) {
-    t.string('username', { description: 'New username of user' });
+    t.nonNull.int('id', { description: 'User id to be changed' });
     t.string('name', { description: 'New name of user' });
     t.field('role', { type: Role, description: 'New role of user' });
     t.boolean('active', { description: 'New active status of user' });
@@ -174,11 +174,10 @@ export const UserMutation = extendType({
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
       resolve: async (_, args, { prisma }) => {
-        const { username, name, role, active } = args.input;
+        const { id, name, role, active } = args.input;
         const user = await prisma.user.update({
-          where: { username: username ?? undefined },
+          where: { id },
           data: {
-            username: username ?? undefined,
             name,
             role: role ?? undefined,
             active: active ?? undefined,
@@ -195,10 +194,10 @@ export const UserMutation = extendType({
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
       resolve: async (_, args, { prisma }) => {
-        const { username, currentPassword, newPassword } = args.input;
+        const { id, currentPassword, newPassword } = args.input;
 
         const user = await (prisma as PrismaClient).user.findUnique({
-          where: { username },
+          where: { id },
         });
 
         if (!user) return { success: false, message: 'User not found' };
@@ -211,7 +210,7 @@ export const UserMutation = extendType({
 
         await (prisma as PrismaClient).user.update({
           where: {
-            username,
+            id,
           },
           data: {
             password: hashPwd,
