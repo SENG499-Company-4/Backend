@@ -139,7 +139,7 @@ type Mutation {
 }
 
 type Query {
-  """Get a list of courses for a given term"""
+  """Get a list of courses for a given term and/or year"""
   courses(term: Term, year: Int): [CourseSection!]
 
   """Find a user by their id"""
