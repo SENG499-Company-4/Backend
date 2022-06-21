@@ -234,7 +234,14 @@ export const UserQuery = extendType({
       type: User,
       description: 'Find a user by their id',
       args: {
-        id: nonNull(idArg()),
+        id: nonNull(intArg()),
+      },
+      resolve: async (_, { id }, { prisma }) => {
+        return await (prisma as PrismaClient).user.findUnique({
+          where: {
+            id,
+          },
+        });
       },
     });
   },
