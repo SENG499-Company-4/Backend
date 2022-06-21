@@ -153,10 +153,8 @@ type Query {
   """
   schedule(year: Int): Schedule
 
-  """
-  Get Teaching Preference Survey for a given username and course offering
-  """
-  survey(courseid: Int, username: String): TeachingPreferenceSurvey!
+  """Get Teaching Preference Survey for a given User ID"""
+  survey(userid: Int): TeachingPreferenceSurvey!
 }
 
 type ResetPasswordMutationResult {
@@ -200,7 +198,7 @@ type Schedule {
 }
 
 type TeachingPreferenceSurvey {
-  courses: [CourseID!]!
+  courses: [CoursePreference!]!
 }
 
 """UVic Terms"""

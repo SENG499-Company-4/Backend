@@ -16,7 +16,7 @@ export const CoursePreference = objectType({
 export const TeachingPreferenceSurvey = objectType({
   name: 'TeachingPreferenceSurvey',
   definition(t) {
-    t.nonNull.list.nonNull.field('courses', { type: CourseID });
+    t.nonNull.list.nonNull.field('courses', { type: CoursePreference });
   },
 });
 
@@ -25,27 +25,35 @@ export const PreferenceQuery = extendType({
   definition(t) {
     t.nonNull.field('survey', {
       type: TeachingPreferenceSurvey,
-      description: 'Get Teaching Preference Survey for a given username and course offering',
+      description: 'Get Teaching Preference Survey for a given User ID',
       args: {
-        username: arg({ type: 'String' }),
-        courseid: arg({ type: 'Int' }),
+        userid: arg({ type: 'Int' }),
       },
       resolve: async (_, args, ctx) => {
-        const { username, courseid } = args;
+        const { userid } = args;
         const { prisma } = ctx;
-        if(!username || !courseid) {
+        if(!userid) {
           return null;
         }
-        const pref = await (prisma as PrismaClient).preference.findFirst({
+        let prefs: any = [];
+        const pref = await (prisma as PrismaClient).preference.findMany({
           where: {
             user: {
-              username,
-            },
-            courseID: courseid,
+              id: userid,
+            }
           },
         });
-
-        return pref;
+        
+        for (const p of pref) {
+          prefs.push({
+            id: p.courseID,
+            preference: p.rank,
+          });
+        }
+        return {
+          courses: prefs,
+        };
+          
       }
     },
     );
