@@ -76,31 +76,29 @@ export const CourseQuery = extendType({
         }
         console.log(courses);
         // Get meeting times for each course
-        for (const course of courses) {
-          const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
+        return courses.map(({id, subject, code, term, year, weeklyHours, capacity, professorUsername, startDate, endDate}) => {
+         const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
             where: {
               course: {
-                id: course.id,
+                id,
               },
             }
             });
-            courseSections.push({
-              CourseID: {
-                subject: course.subject,
-                code: course.code,
-                term: course.term,
-                year: course.year
-              },
-              hoursPerWeek: course.weeklyHours,
-              capacity: course.capacity,
-              professors: course.professorUsername,
-              startDate: course.startDate,
-              endDate: course.endDate,
-              meetingTimes: meetingTimes,
-            });
-        }
-
-        return courseSections;
+            return {
+            courseId: {
+             subject,
+             code,
+             term,
+             year
+            },
+            hoursPerWeek: weeklyHours,
+            capacity,
+            professors: professorUsername,
+            startDate,
+            endDate,
+            meetingTimes
+            }
+        });
     }
     });
   },
