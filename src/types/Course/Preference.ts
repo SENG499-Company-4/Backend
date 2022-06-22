@@ -29,27 +29,26 @@ export const PreferenceQuery = extendType({
         userid: arg({ type: 'Int' }),
       },
       resolve: async (_, { userid }, { prisma }) => {
-        if(!userid) {
+        if (!userid) {
           return null;
         }
         const prefs = await (prisma as PrismaClient).preference.findMany({
           where: {
             user: {
               id: userid,
-            }
+            },
           },
         });
-        
-       const courses = prefs.map(({ courseID, rank }) => ({
+
+        const courses = prefs.map(({ courseID, rank }) => ({
           id: courseID,
-          preference: rank
-       }));
-       
+          preference: rank,
+        }));
+
         return {
           courses,
         };
-      }
-    },
-    );
-  }
+      },
+    });
+  },
 });
