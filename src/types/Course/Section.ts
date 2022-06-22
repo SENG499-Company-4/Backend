@@ -51,8 +51,8 @@ export const CourseQuery = extendType({
         if (term && year){
           courses = await (prisma as PrismaClient).course.findMany({
             where: {
-              term: term,
-              year: year,
+              term,
+              year,
             },
           });
 
