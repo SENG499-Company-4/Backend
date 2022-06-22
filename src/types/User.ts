@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
-import { arg, enumType, extendType, idArg, inputObjectType, nonNull, objectType, stringArg } from 'nexus';
+import { arg, enumType, extendType, idArg, inputObjectType, intArg, nonNull, objectType, stringArg } from 'nexus';
 import generateHashPassword from '../utils/hash';
 import { CoursePreference } from './Course/Preference';
 import { Error as NexusError } from './Error';
