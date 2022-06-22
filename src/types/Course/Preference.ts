@@ -32,8 +32,7 @@ export const PreferenceQuery = extendType({
         if(!userid) {
           return null;
         }
-        let prefs: any = [];
-        const pref = await (prisma as PrismaClient).preference.findMany({
+        const prefs = await (prisma as PrismaClient).preference.findMany({
           where: {
             user: {
               id: userid,
@@ -41,16 +40,14 @@ export const PreferenceQuery = extendType({
           },
         });
         
-        for (const p of pref) {
-          prefs.push({
-            id: p.courseID,
-            preference: p.rank,
-          });
-        }
+       const courses = prefs.map(({ courseID, rank }) => ({
+          id: courseID,
+          preference: rank
+       }));
+       
         return {
-          courses: prefs,
+          courses,
         };
-          
       }
     },
     );
