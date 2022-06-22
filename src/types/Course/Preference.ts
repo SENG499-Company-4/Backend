@@ -28,9 +28,7 @@ export const PreferenceQuery = extendType({
       args: {
         userid: arg({ type: 'Int' }),
       },
-      resolve: async (_, args, ctx) => {
-        const { userid } = args;
-        const { prisma } = ctx;
+      resolve: async (_, { userid }, { prisma }) => {
         if(!userid) {
           return null;
         }
