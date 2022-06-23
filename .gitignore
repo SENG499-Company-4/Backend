@@ -38,7 +38,7 @@ node_modules/
 .vscode-test
 
 # Build outputs
-dist/*
+dist/
 
 # Misc
 .DS_Store
