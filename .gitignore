@@ -29,7 +29,6 @@ node_modules/
 *.tgz
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -38,7 +37,13 @@ node_modules/
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# Schema Test files, including shared repo and sorted schema files
+# Schema Test script files
 shared
 c3schema.graphql
 c4schema.graphql
+
+# Build outputs
+dist/
+
+# Misc
+.DS_Store

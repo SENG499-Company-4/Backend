@@ -1,6 +1,10 @@
-import { arg, enumType, extendType, idArg, inputObjectType, nonNull, objectType, stringArg } from 'nexus';
+import { PrismaClient } from '@prisma/client';
+import { compare } from 'bcrypt';
+import { arg, enumType, extendType, idArg, inputObjectType, intArg, nonNull, objectType, stringArg } from 'nexus';
+import { generateToken, getUserId } from '../utils/auth';
+import generateHashPassword from '../utils/hash';
 import { CoursePreference } from './Course/Preference';
-import { Error } from './Error';
+import { Error as NexusError } from './Error';
 import { Response } from './Response';
 
 export const AuthPayload = objectType({
@@ -16,6 +20,7 @@ export const AuthPayload = objectType({
 export const ChangeUserPasswordInput = inputObjectType({
   name: 'ChangeUserPasswordInput',
   definition(t) {
+    t.nonNull.int('id', { description: 'ID of user to change password for' });
     t.nonNull.string('currentPassword');
     t.nonNull.string('newPassword');
   },
@@ -52,7 +57,10 @@ export const Role = enumType({
 export const UpdateUserInput = inputObjectType({
   name: 'UpdateUserInput',
   definition(t) {
-    t.nonNull.id('id', { description: 'ID of user to update' });
+    t.nonNull.int('id', { description: 'User id to be changed' });
+    t.string('name', { description: 'New name of user' });
+    t.field('role', { type: Role, description: 'New role of user' });
+    t.boolean('active', { description: 'New active status of user' });
   },
 });
 
@@ -60,15 +68,26 @@ export const UpdateUserMutationResult = objectType({
   name: 'UpdateUserMutationResult',
   definition(t) {
     t.field('user', { type: User });
-    t.list.nonNull.field('errors', { type: Error });
+    t.list.nonNull.field('errors', { type: NexusError });
+  },
+});
+
+export const CreateUserInput = inputObjectType({
+  name: 'CreateUserInput',
+  definition(t) {
+    t.string('name');
+    t.nonNull.string('username');
+    t.nonNull.string('password');
+    t.nonNull.field('role', { type: Role });
   },
 });
 
 export const User = objectType({
   name: 'User',
   definition(t) {
-    t.nonNull.int('id', { description: 'Unique User  ID' });
+    t.nonNull.int('id', { description: 'User id' });
     t.nonNull.string('username', { description: 'Username' });
+    t.string('name', { description: 'Name of the user' });
     t.nonNull.string('password', { description: 'Password' });
     t.nonNull.field('role', {
       type: Role,
@@ -78,7 +97,9 @@ export const User = objectType({
       type: CoursePreference,
       description: 'Teaching preferences',
     });
-    t.nonNull.boolean('active', { description: 'Determine if the user is marked active' });
+    t.nonNull.boolean('active', {
+      description: 'Determine if the user is marked active',
+    });
   },
 });
 
@@ -89,7 +110,27 @@ export const UserMutation = extendType({
       type: CreateUserMutationResult,
       description: 'Register a new user account',
       args: {
-        username: nonNull(stringArg()),
+        input: arg({ type: nonNull(CreateUserInput) }),
+      },
+      resolve: async (_, { input: { name, username, password, role } }, { prisma }) => {
+        if (await prisma.user.findFirst({ where: { username } })) {
+          return {
+            success: false,
+            message: 'User already exists',
+          };
+        }
+
+        const newUser = await prisma.user.create({
+          data: {
+            name,
+            username,
+            password: await generateHashPassword(password),
+            role,
+          },
+        });
+
+        if (!newUser) return { success: false, message: 'Could not create user' };
+        return { success: true, message: 'User created' };
       },
     });
     t.nonNull.field('login', {
@@ -99,16 +140,59 @@ export const UserMutation = extendType({
         username: nonNull(stringArg()),
         password: nonNull(stringArg()),
       },
+      resolve: async (_root, args, ctx) => {
+        const user = await ctx.prisma.user.findFirst({
+          where: { username: args.username },
+        });
+
+        if (!user) {
+          return {
+            message: `Could not find user with username ${args.username}`,
+            success: false,
+            token: '',
+          };
+        }
+
+        const passwordMatch = await compare(args.password, user.password);
+        if (!passwordMatch) {
+          return {
+            message: `Incorrect password for user ${args.username}`,
+            success: false,
+            token: '',
+          };
+        }
+
+        const token = generateToken(user.id);
+        return {
+          message: `Successfully logged in user ${args.username}`,
+          success: true,
+          token,
+        };
+      },
     });
     t.nonNull.field('logout', {
       type: AuthPayload,
       description: 'Logout the currently logged in user',
+      resolve: () => ({ success: false, message: "I don't think we actually need this in the backend", token: '' }),
     });
     t.field('updateUser', {
       type: UpdateUserMutationResult,
       description: 'Updates a user given the user id.',
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
+      },
+      resolve: async (_, { input: { id, name, role, active } }, { prisma }) => {
+        const user = await prisma.user.update({
+          where: { id },
+          data: {
+            name,
+            role: role ?? undefined,
+            active: active ?? undefined,
+          },
+        });
+
+        if (!user) return { errors: [{ message: 'Could not update user' }] };
+        return { user };
       },
     });
     t.nonNull.field('changeUserPassword', {
@@ -117,6 +201,27 @@ export const UserMutation = extendType({
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
+      resolve: async (_, { input: { id, currentPassword, newPassword } }, { prisma }) => {
+        const user = await (prisma as PrismaClient).user.findUnique({
+          where: { id },
+        });
+
+        if (!user) return { success: false, message: 'User not found' };
+
+        const isValid = await compare(currentPassword, user.password);
+        if (!isValid) return { success: false, message: 'Invalid current password' };
+
+        await (prisma as PrismaClient).user.update({
+          where: {
+            id,
+          },
+          data: {
+            password: await generateHashPassword(newPassword),
+          },
+        });
+
+        return { success: true, message: 'Password updated' };
+      },
     });
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
@@ -124,6 +229,7 @@ export const UserMutation = extendType({
       args: {
         id: nonNull(idArg()),
       },
+      resolve: () => ({ success: false, message: 'Not implemented' }),
     });
   },
 });
@@ -134,12 +240,23 @@ export const UserQuery = extendType({
     t.field('me', {
       type: User,
       description: 'Get the current user',
+      resolve: (_, __, ctx) => {
+        const id = getUserId(ctx.token);
+        return ctx.prisma.user.findFirst({ where: { id } });
+      },
     });
     t.field('findUserById', {
       type: User,
       description: 'Find a user by their id',
       args: {
-        id: nonNull(idArg()),
+        id: nonNull(intArg()),
+      },
+      resolve: async (_, { id }, { prisma }) => {
+        return await (prisma as PrismaClient).user.findUnique({
+          where: {
+            id,
+          },
+        });
       },
     });
   },

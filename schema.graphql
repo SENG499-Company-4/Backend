@@ -16,6 +16,9 @@ type AuthPayload {
 
 input ChangeUserPasswordInput {
   currentPassword: String!
+
+  """ID of user to change password for"""
+  id: Int!
   newPassword: String!
 }
 
@@ -28,6 +31,9 @@ type CourseID {
 
   """Term course is offered in"""
   term: Term!
+
+  """Year course is offered in"""
+  year: Int!
 }
 
 type CoursePreference {
@@ -59,6 +65,13 @@ type CourseSection {
 
   """The start date of the course"""
   startDate: Date!
+}
+
+input CreateUserInput {
+  name: String
+  password: String!
+  role: Role!
+  username: String!
 }
 
 type CreateUserMutationResult {
@@ -107,7 +120,7 @@ type Mutation {
   changeUserPassword(input: ChangeUserPasswordInput!): Response!
 
   """Register a new user account"""
-  createUser(username: String!): CreateUserMutationResult!
+  createUser(input: CreateUserInput!): CreateUserMutationResult!
 
   """Generate schedule"""
   generateSchedule(input: GenerateScheduleInput!): Response!
@@ -130,7 +143,7 @@ type Query {
   courses(term: Term): [CourseSection!]
 
   """Find a user by their id"""
-  findUserById(id: ID!): User
+  findUserById(id: Int!): User
 
   """Get the current user"""
   me: User
@@ -196,8 +209,17 @@ enum Term {
 }
 
 input UpdateUserInput {
-  """ID of user to update"""
-  id: ID!
+  """New active status of user"""
+  active: Boolean
+
+  """User id to be changed"""
+  id: Int!
+
+  """New name of user"""
+  name: String
+
+  """New role of user"""
+  role: Role
 }
 
 type UpdateUserMutationResult {
@@ -209,8 +231,11 @@ type User {
   """Determine if the user is marked active"""
   active: Boolean!
 
-  """Unique User  ID"""
+  """User id"""
   id: Int!
+
+  """Name of the user"""
+  name: String
 
   """Password"""
   password: String!
