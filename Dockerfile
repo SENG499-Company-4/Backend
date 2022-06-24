@@ -13,5 +13,4 @@ RUN npm i --save-dev @types/bcrypt
 EXPOSE 4000
 
 RUN npm run build
-RUN npm run deploy
 ENTRYPOINT ["npm", "start"]
