@@ -26,7 +26,6 @@ export const PreferenceQuery = extendType({
     t.nonNull.field('survey', {
       type: TeachingPreferenceSurvey,
       description: 'Get Teaching Preference Survey for the current user',
-      args: {},
       resolve: async (_, __, ctx) => {
         const prefs = await (ctx.prisma as PrismaClient).preference.findMany({
           where: {
