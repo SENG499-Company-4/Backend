@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm install --production
+RUN npm i --save-dev @types/bcrypt
 
 EXPOSE 4000
 
