@@ -12,5 +12,5 @@ RUN npm install --production
 EXPOSE 4000
 
 RUN npm run build
-RUN npm run prisma
-ENTRYPOINT ["./setup.sh"]
+RUN npm run deploy
+ENTRYPOINT ["npm", "start"]
