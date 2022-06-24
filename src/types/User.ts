@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { arg, enumType, extendType, idArg, inputObjectType, intArg, nonNull, objectType, stringArg } from 'nexus';
+import { generateToken, getUserId } from '../utils/auth';
 import generateHashPassword from '../utils/hash';
 import { CoursePreference } from './Course/Preference';
 import { Error as NexusError } from './Error';
@@ -96,7 +97,9 @@ export const User = objectType({
       type: CoursePreference,
       description: 'Teaching preferences',
     });
-    t.nonNull.boolean('active', { description: 'Determine if the user is marked active' });
+    t.nonNull.boolean('active', {
+      description: 'Determine if the user is marked active',
+    });
   },
 });
 
@@ -137,32 +140,40 @@ export const UserMutation = extendType({
         username: nonNull(stringArg()),
         password: nonNull(stringArg()),
       },
-      resolve: async (root, args, ctx) => {
-        const { username, password } = args;
-        const { prisma } = ctx;
-        const user = await (prisma as PrismaClient).user.findFirst({
-          where: {
-            username: username.toLowerCase(),
-            password,
-          },
+      resolve: async (_root, args, ctx) => {
+        const user = await ctx.prisma.user.findFirst({
+          where: { username: args.username },
         });
+
         if (!user) {
           return {
+            message: `Could not find user with username ${args.username}`,
             success: false,
-            message: 'Invalid username or password',
             token: '',
           };
         }
+
+        const passwordMatch = await compare(args.password, user.password);
+        if (!passwordMatch) {
+          return {
+            message: `Incorrect password for user ${args.username}`,
+            success: false,
+            token: '',
+          };
+        }
+
+        const token = generateToken(user.id);
         return {
+          message: `Successfully logged in user ${args.username}`,
           success: true,
-          token: '',
+          token,
         };
       },
     });
     t.nonNull.field('logout', {
       type: AuthPayload,
       description: 'Logout the currently logged in user',
-      resolve: () => ({ success: false, message: 'Not implemented', token: '' }),
+      resolve: () => ({ success: false, message: "I don't think we actually need this in the backend", token: '' }),
     });
     t.field('updateUser', {
       type: UpdateUserMutationResult,
@@ -229,6 +240,10 @@ export const UserQuery = extendType({
     t.field('me', {
       type: User,
       description: 'Get the current user',
+      resolve: (_, __, ctx) => {
+        const id = getUserId(ctx.token);
+        return ctx.prisma.user.findFirst({ where: { id } });
+      },
     });
     t.field('findUserById', {
       type: User,

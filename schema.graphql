@@ -143,7 +143,7 @@ type Query {
   courses(term: Term): [CourseSection!]
 
   """Find a user by their id"""
-  findUserById(id: ID!): User
+  findUserById(id: Int!): User
 
   """Get the current user"""
   me: User
