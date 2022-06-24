@@ -1,4 +1,4 @@
-import { Course, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { arg, extendType, objectType } from 'nexus';
 import { Date } from '../Date';
 import { Term } from '../Term';
