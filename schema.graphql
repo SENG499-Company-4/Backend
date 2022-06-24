@@ -139,8 +139,8 @@ type Mutation {
 }
 
 type Query {
-  """Get a list of courses for a given term"""
-  courses(term: Term): [CourseSection!]
+  """Get a list of courses for a given term and/or year"""
+  courses(term: Term, year: Int): [CourseSection!]
 
   """Find a user by their id"""
   findUserById(id: Int!): User
@@ -153,7 +153,7 @@ type Query {
   """
   schedule(year: Int): Schedule
 
-  """Get Teaching Preference Survey"""
+  """Get Teaching Preference Survey for the current user"""
   survey: TeachingPreferenceSurvey!
 }
 
@@ -198,7 +198,7 @@ type Schedule {
 }
 
 type TeachingPreferenceSurvey {
-  courses: [CourseID!]!
+  courses: [CoursePreference!]!
 }
 
 """UVic Terms"""

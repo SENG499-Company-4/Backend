@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { arg, extendType, objectType } from 'nexus';
 import { Date } from '../Date';
 import { Term } from '../Term';
@@ -32,10 +33,41 @@ export const CourseQuery = extendType({
   type: 'Query',
   definition(t) {
     t.list.nonNull.field('courses', {
+      // type is a list of coursesections
       type: CourseSection,
-      description: 'Get a list of courses for a given term',
+      description: 'Get a list of courses for a given term and/or year',
       args: {
         term: arg({ type: Term }),
+        year: arg({ type: 'Int' }),
+      },
+      resolve: async (_, { term, year }, { prisma }) => {
+        return (
+          await (prisma as PrismaClient).course.findMany({
+            where: { term: term ?? undefined, year: year ?? undefined },
+          })
+        ).map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
+          const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
+            where: {
+              course: {
+                id,
+              },
+            },
+          });
+          return {
+            CourseID: {
+              subject,
+              code,
+              term,
+              year,
+            },
+            hoursPerWeek: weeklyHours,
+            capacity,
+            professors: professorId,
+            startDate,
+            endDate,
+            meetingTimes,
+          };
+        });
       },
     });
   },
