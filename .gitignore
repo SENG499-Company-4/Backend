@@ -39,7 +39,7 @@ node_modules/
 .vscode
 
 # Build outputs
-dist/*
+dist/
 
 # Misc
 .DS_Store

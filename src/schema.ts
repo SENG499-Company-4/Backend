@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { makeSchema } from 'nexus';
+import { fieldAuthorizePlugin, makeSchema } from 'nexus';
 import * as types from './types';
 
 export const schema = makeSchema({
@@ -12,4 +12,5 @@ export const schema = makeSchema({
     module: join(process.cwd(), './src/context.ts'),
     export: 'Context',
   },
+  plugins: [fieldAuthorizePlugin()],
 });
