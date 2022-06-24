@@ -153,8 +153,8 @@ type Query {
   """
   schedule(year: Int): Schedule
 
-  """Get Teaching Preference Survey for a given User ID"""
-  survey(userid: Int): TeachingPreferenceSurvey!
+  """Get Teaching Preference Survey for the current user"""
+  survey: TeachingPreferenceSurvey!
 }
 
 type ResetPasswordMutationResult {

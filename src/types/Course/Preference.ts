@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { arg, extendType, objectType } from 'nexus';
+import { extendType, objectType } from 'nexus';
+import { getUserId } from '../../utils/auth';
 import { CourseID } from './ID';
 
 export const CoursePreference = objectType({
@@ -24,18 +25,13 @@ export const PreferenceQuery = extendType({
   definition(t) {
     t.nonNull.field('survey', {
       type: TeachingPreferenceSurvey,
-      description: 'Get Teaching Preference Survey for a given User ID',
-      args: {
-        userid: arg({ type: 'Int' }),
-      },
-      resolve: async (_, { userid }, { prisma }) => {
-        if (!userid) {
-          return null;
-        }
-        const prefs = await (prisma as PrismaClient).preference.findMany({
+      description: 'Get Teaching Preference Survey for the current user',
+      args: {},
+      resolve: async (_, __, ctx) => {
+        const prefs = await (ctx.prisma as PrismaClient).preference.findMany({
           where: {
             user: {
-              id: userid,
+              id: getUserId(ctx.token),
             },
           },
         });
