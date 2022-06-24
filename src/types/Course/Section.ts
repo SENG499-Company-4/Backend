@@ -44,113 +44,33 @@ export const CourseQuery = extendType({
         const { term, year } = args;
         const { prisma } = ctx;
 
-        if (term && year) {
-          return (await (prisma as PrismaClient).course.findMany({ where: { term, year } })).map(
-            ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-              const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
-                where: {
-                  course: {
-                    id,
-                  },
-                },
-              });
-              return {
-                CourseID: {
-                  subject,
-                  code,
-                  term,
-                  year,
-                },
-                hoursPerWeek: weeklyHours,
-                capacity,
-                professors: professorId,
-                startDate,
-                endDate,
-                meetingTimes,
-              };
-            }
-          );
-        }
-
-        if (term) {
-          return (await (prisma as PrismaClient).course.findMany({ where: { term } })).map(
-            ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-              const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
-                where: {
-                  course: {
-                    id,
-                  },
-                },
-              });
-              return {
-                CourseID: {
-                  subject,
-                  code,
-                  term,
-                  year,
-                },
-                hoursPerWeek: weeklyHours,
-                capacity,
-                professors: professorId,
-                startDate,
-                endDate,
-                meetingTimes,
-              };
-            }
-          );
-        }
-        if (year) {
-          return (await (prisma as PrismaClient).course.findMany({ where: { year } })).map(
-            ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-              const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
-                where: {
-                  course: {
-                    id,
-                  },
-                },
-              });
-              return {
-                CourseID: {
-                  subject,
-                  code,
-                  term,
-                  year,
-                },
-                hoursPerWeek: weeklyHours,
-                capacity,
-                professors: professorId,
-                startDate,
-                endDate,
-                meetingTimes,
-              };
-            }
-          );
-        }
-        return (await (prisma as PrismaClient).course.findMany()).map(
-          ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-            const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
-              where: {
-                course: {
-                  id,
-                },
+        return (
+          await (prisma as PrismaClient).course.findMany({
+            where: { term: term ?? undefined, year: year ?? undefined },
+          })
+        ).map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
+          const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
+            where: {
+              course: {
+                id,
               },
-            });
-            return {
-              CourseID: {
-                subject,
-                code,
-                term,
-                year,
-              },
-              hoursPerWeek: weeklyHours,
-              capacity,
-              professors: professorId,
-              startDate,
-              endDate,
-              meetingTimes,
-            };
-          }
-        );
+            },
+          });
+          return {
+            CourseID: {
+              subject,
+              code,
+              term,
+              year,
+            },
+            hoursPerWeek: weeklyHours,
+            capacity,
+            professors: professorId,
+            startDate,
+            endDate,
+            meetingTimes,
+          };
+        });
       },
     });
   },
