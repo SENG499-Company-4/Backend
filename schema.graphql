@@ -151,7 +151,7 @@ type Query {
   """
   Schedule for a given term. If year is given, returns the most recent schedule generated for that year.
   """
-  schedule(year: Int): Schedule
+  schedule(year: Int): String
 
   """Get Teaching Preference Survey for the current user"""
   survey: TeachingPreferenceSurvey!
