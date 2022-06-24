@@ -126,7 +126,8 @@ export const CourseQuery = extendType({
             }
           );
         }
-        return (await (prisma as PrismaClient).course.findMany()).map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
+        return (await (prisma as PrismaClient).course.findMany()).map(
+          ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
             const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
               where: {
                 course: {
