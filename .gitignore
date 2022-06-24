@@ -37,3 +37,8 @@ node_modules/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
+# Schema Test files, including shared repo and sorted schema files
+shared
+c3schema.graphql
+c4schema.graphql

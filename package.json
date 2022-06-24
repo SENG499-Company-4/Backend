@@ -9,7 +9,8 @@
     "build": "tsc",
     "lint": "eslint \"src/**/*.{t,j}s{x,}\"",
     "lint:fix": "eslint --fix \"src/**/*.{t,j}s{x,}\"",
-    "format": "prettier --write \"src/**/*.{t,j}s{x,}\""
+    "format": "prettier --write \"src/**/*.{t,j}s{x,}\"",
+    "schema-test": "./schema_diff.sh"
   },
   "repository": {
     "type": "git",
