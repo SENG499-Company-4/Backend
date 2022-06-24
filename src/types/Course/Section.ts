@@ -40,10 +40,7 @@ export const CourseQuery = extendType({
         term: arg({ type: Term }),
         year: arg({ type: 'Int' }),
       },
-      resolve: async (_, args, ctx) => {
-        const { term, year } = args;
-        const { prisma } = ctx;
-
+      resolve: async (_, { term, year }, { prisma }) => {
         return (
           await (prisma as PrismaClient).course.findMany({
             where: { term: term ?? undefined, year: year ?? undefined },
