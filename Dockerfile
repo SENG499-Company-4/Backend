@@ -8,9 +8,10 @@ WORKDIR /app
 COPY . .
 
 RUN npm install --production
+RUN npm i --save-dev @types/bcrypt
+RUN npm i --save-dev @types/node-fetch
 
 EXPOSE 4000
 
 RUN npm run build
-RUN npm run deploy
 ENTRYPOINT ["npm", "start"]
