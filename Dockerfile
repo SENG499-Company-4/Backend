@@ -9,6 +9,7 @@ COPY . .
 
 RUN npm install --production
 RUN npm i --save-dev @types/bcrypt
+RUN npm i --save-dev @types/node-fetch
 
 EXPOSE 4000
 
