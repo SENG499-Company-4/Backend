@@ -1,11 +1,10 @@
-name: Lint Code Base
+name: Lint and build repo
 
 on:
   pull_request:
     branches: [ main ]
   push:
-    branches: 
-      - publish-docker-image
+    branches: [publish-docker-image]
 
 env:
   REGISTRY: ghcr.io
@@ -20,11 +19,28 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
+
       - name: Install Dependencies
         run: npm install
-        
+
       - name: Run ESLint
         run: npm run lint
+
+      # TODO: Run tests when they are available
+      #- name: Run Tests
+      #  run: npm run test
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    needs: run-lint
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Log in to the container registry
         uses: docker/login-action@v2
@@ -43,10 +59,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          push: true
+          push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}-${{ github.run_number }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      # TODO: Run tests when they are available
-      #- name: Run Tests
-      #  run: npm run test
