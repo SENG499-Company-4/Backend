@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]
   push:
-    branches: [publish-docker-image]
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -54,9 +54,6 @@ jobs:
         uses: docker/metadata-action@v2
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: print event name
-        run: echo ${{ github.event_name }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
