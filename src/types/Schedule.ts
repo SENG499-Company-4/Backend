@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import fetch from 'node-fetch';
 import { CourseSection } from './Course/Section';
@@ -173,33 +174,64 @@ export const ScheduleQuery = extendType({
   type: 'Query',
   definition(t) {
     t.string('schedule', {
-      // TODO: Revert this, just wanna return proof we connected to algo 2
-      // type: Schedule,
+      type: Schedule,
       description:
         'Schedule for a given term. If year is given, returns the most recent schedule generated for that year.',
       args: {
         year: intArg(),
       },
-      resolve: async () => {
-        const response = await fetch('https://seng499company4algorithm2.herokuapp.com/predict_class_size', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+      resolve: async (_, { year }, { prisma }) => {
+        const latestSchedule = await (prisma as PrismaClient).schedule.findFirst({
+          where: {
+            year:
+              year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
           },
-          body: JSON.stringify([
-            {
-              subject: 'SENG',
-              code: '499',
-              // eslint-disable-next-line camelcase
-              seng_ratio: 0.75,
-              semester: 'FALL',
-              capacity: 45,
+        });
+        console.log('Schedule ' + latestSchedule);
+        // Return error if latest schedule does not exist
+        if (!latestSchedule) {
+          console.log('No schedule found for year ' + year);
+          return;
+        }
+
+        // Fetch meeting times from the latest schedule
+        const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
+          where: {
+            schedule: {
+              id: latestSchedule.id,
             },
-          ]),
+          },
         });
 
-        return JSON.stringify(await response.json());
+        // Fetch courses from the latest schedule
+        const courses = await (prisma as PrismaClient).course.findMany({
+          where: {
+            id: {
+              in: meetingTimes.map((meetingTime) => meetingTime.courseID),
+            },
+          },
+        });
+        // Return schedule object
+        return {
+          id: latestSchedule.id,
+          year: latestSchedule.year,
+          createdAt: latestSchedule.createdAt,
+          courses: courses,
+          // courses: courses.map((course) => ({
+          //   CourseID: {
+          //     course.subject,
+          //     code,
+          //     term,
+          //     year,
+          //   },
+          //   hoursPerWeek: weeklyHours,
+          //   capacity,
+          //   professors: professorId,
+          //   startDate,
+          //   endDate,
+          //   meetingTimes,
+          // })),
+        };
       },
     });
   },

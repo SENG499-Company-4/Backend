@@ -1,0 +1,44 @@
+[
+    {
+        "courseID": 1,
+        "day": "MONDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    },
+    {
+        "courseID": 1,
+        "day": "WEDNESDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    },
+    {
+        "courseID": 5,
+        "day": "FRIDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    },
+    {
+        "courseID": 5,
+        "day": "MONDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    },
+    {
+        "courseID": 5,
+        "day": "TUESDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    },
+    {
+        "courseID": 5,
+        "day": "THURSDAY",
+        "startTime": "2021-01-20T12:00:00.000Z",
+        "endTime": "2021-01-20T12:50:00.000Z",
+        "scheduleID": 1
+    }
+]
