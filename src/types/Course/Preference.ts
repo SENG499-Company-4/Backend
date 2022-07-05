@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Term } from '@prisma/client';
 import { extendType, objectType } from 'nexus';
 import { getUserId } from '../../utils/auth';
 import { CourseID } from './ID';
@@ -35,10 +35,35 @@ export const PreferenceQuery = extendType({
           },
         });
 
-        const courses = prefs.map(({ courseID, rank }) => ({
-          id: courseID,
-          preference: rank,
-        }));
+        const courses = prefs.map(async ({ courseID, rank }) => {
+          const courseData = await (prisma as PrismaClient).course.findUnique({
+            where: {
+              id: courseID,
+            },
+          });
+
+          if (!courseData) {
+            return {
+              id: {
+                subject: '',
+                code: '',
+                term: '' as Term,
+                year: 0,
+              },
+              preference: 0,
+            };
+          }
+
+          return {
+            id: {
+              subject: courseData.subject,
+              code: courseData.code,
+              term: courseData.term,
+              year: courseData.year,
+            },
+            preference: rank ?? 0,
+          };
+        });
 
         return {
           courses,
