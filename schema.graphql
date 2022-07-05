@@ -36,6 +36,20 @@ type CourseID {
   year: Int!
 }
 
+input CourseIDInput {
+  """Course code, e.g. 499, 310"""
+  code: String!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
+
+  """Term course is offered in"""
+  term: Term!
+
+  """Year course is offered in"""
+  year: Int!
+}
+
 type CoursePreference {
   id: CourseID!
   preference: Int!
@@ -100,6 +114,8 @@ type Error {
 }
 
 input GenerateScheduleInput {
+  courses: [CourseIDInput]
+  term: Term!
   year: Int!
 }
 
