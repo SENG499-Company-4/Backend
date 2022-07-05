@@ -1,5 +1,6 @@
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import fetch from 'node-fetch';
+import { CourseIDInput } from './Course';
 import { CourseSection } from './Course/Section';
 import { Date } from './Date';
 import { Response } from './Response';
@@ -9,6 +10,8 @@ export const GenerateScheduleInput = inputObjectType({
   name: 'GenerateScheduleInput',
   definition(t) {
     t.nonNull.int('year');
+    t.nonNull.field('term', { type: Term });
+    t.list.field('courses', { type: CourseIDInput });
   },
 });
 
@@ -163,7 +166,7 @@ export const ScheduleMutation = extendType({
           }),
         });
 
-        return { success: true, message: JSON.stringify(await response.json()) };
+        return { success: true, message: JSON.stringify(response.json()) };
       },
     });
   },
