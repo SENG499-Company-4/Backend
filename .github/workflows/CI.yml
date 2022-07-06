@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   REPO_NAME: ${{ github.repository }}
-  IS_PUSH_ON_DEFAULT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/anmol-dummy-branch' }}
+  IS_PUSH_ON_DEFAULT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
 jobs:
   run-lint:
@@ -83,7 +83,7 @@ jobs:
     steps:
       - name: Dispatch event to trigger integration tests
         uses: peter-evans/repository-dispatch@v2
-        if: ${{ env.IS_PUSH_ON_LATEST }}
+        if: ${{ env.IS_PUSH_ON_DEFAULT == 'true' }}
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: seng499-s22-company3/shared
