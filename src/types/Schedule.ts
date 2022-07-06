@@ -3,7 +3,7 @@ import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'n
 import fetch from 'node-fetch';
 import { CourseSection } from './Course/Section';
 import { Date } from './Date';
-
+import { MeetingTime } from './Course/MeetingTime';
 import { Response } from './Response';
 import { Term } from './Term';
 
@@ -229,7 +229,7 @@ export const ScheduleQuery = extendType({
             professors: course.professorId,
             startDate: course.startDate,
             endDate: course.endDate,
-            meetingTimes,
+            meetingTimes: meetingTimes.filter((meetingTime) => meetingTime.courseID === course.id),
           })),
         };
       },
