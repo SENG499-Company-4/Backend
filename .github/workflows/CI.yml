@@ -58,7 +58,7 @@ jobs:
 
       - name: Create alternate default branch tag
         id: defaultbranchtag
-        if: ${{ env.IS_PUSH_ON_DEFAULT }}
+        if: ${{ env.IS_PUSH_ON_DEFAULT  == 'true' }}
         run: |
           DEFAULT_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}:latest
           # change all to lowercase
@@ -83,10 +83,8 @@ jobs:
     steps:
       - name: Dispatch event to trigger integration tests
         uses: peter-evans/repository-dispatch@v2
-        if: ${{ env.IS_PUSH_ON_LATEST }}
+        if: ${{ env.IS_PUSH_ON_DEFAULT == 'true' }}
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: seng499-s22-company3/shared
-          event-type: backend
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repo": "backend"}' 
         
