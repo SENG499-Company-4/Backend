@@ -32,6 +32,9 @@ type CourseID {
   """Term course is offered in"""
   term: Term!
 
+  """Course Title e.g. Introduction to Artificial Intelligence"""
+  title: String
+
   """Year course is offered in"""
   year: Int!
 }

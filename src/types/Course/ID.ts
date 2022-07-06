@@ -5,6 +5,7 @@ export const CourseID = objectType({
   name: 'CourseID',
   definition(t) {
     t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
+    t.nullable.string('title', { description: 'Course Title e.g. Introduction to Artificial Intelligence' });
     t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
     t.nonNull.field('term', {
       type: Term,
