@@ -58,7 +58,7 @@ jobs:
 
       - name: Create alternate default branch tag
         id: defaultbranchtag
-        if: ${{ env.IS_PUSH_ON_DEFAULT == true }}
+        if: ${{ env.IS_PUSH_ON_DEFAULT == 'true' }}
         run: |
           DEFAULT_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}:latest
           # change all to lowercase
