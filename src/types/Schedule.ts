@@ -212,6 +212,16 @@ export const ScheduleQuery = extendType({
             },
           },
         });
+
+        // Fetch profs for the course
+        const users = await (prisma as PrismaClient).user.findMany({
+          where: {
+            id: {
+              in: courses.map((course) => course.professorId),
+            },
+          },
+        });
+
         // Return schedule object
         return {
           id: latestSchedule.id,
@@ -226,7 +236,7 @@ export const ScheduleQuery = extendType({
             },
             hoursPerWeek: course.weeklyHours,
             capacity: course.capacity,
-            professors: course.professorId,
+            professors: users.filter((prof) => prof.id === course.professorId),
             startDate: course.startDate,
             endDate: course.endDate,
             meetingTimes: meetingTimes.filter((meetingTime) => meetingTime.courseID === course.id),
