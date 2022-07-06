@@ -16,6 +16,7 @@
     "schema": "ts-node --transpile-only src/schema.ts",
     "seed": "prisma db seed",
     "start": "node dist/src/index.js",
+    "reset": "npx prisma migrate reset",
     "heroku-postbuild": "npx prisma migrate deploy"
   },
   "repository": {
