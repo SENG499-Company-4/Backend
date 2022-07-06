@@ -217,21 +217,21 @@ export const ScheduleQuery = extendType({
           id: latestSchedule.id,
           year: latestSchedule.year,
           createdAt: latestSchedule.createdAt,
-          courses: courses,
-          // courses: courses.map((course) => ({
-          //   CourseID: {
-          //     course.subject,
-          //     code,
-          //     term,
-          //     year,
-          //   },
-          //   hoursPerWeek: weeklyHours,
-          //   capacity,
-          //   professors: professorId,
-          //   startDate,
-          //   endDate,
-          //   meetingTimes,
-          // })),
+          // courses: courses,
+          courses: courses.map((course) => ({
+            CourseID: {
+              subject: course.subject,
+              code: course.code,
+              term: course.term,
+              year,
+            },
+            hoursPerWeek: course.weeklyHours,
+            capacity: course.capacity,
+            professors: course.professorId,
+            startDate: course.startDate,
+            endDate: course.endDate,
+            meetingTimes,
+          })),
         };
       },
     });
