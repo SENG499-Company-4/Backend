@@ -188,7 +188,7 @@ export const ScheduleQuery = extendType({
               year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
           },
         });
-        
+
         // Return error if latest schedule does not exist
         if (!latestSchedule) {
           console.log('No schedule found for year ' + year);
@@ -217,7 +217,6 @@ export const ScheduleQuery = extendType({
           id: latestSchedule.id,
           year: latestSchedule.year,
           createdAt: latestSchedule.createdAt,
-          // courses: courses,
           courses: courses.map((course) => ({
             CourseID: {
               subject: course.subject,
