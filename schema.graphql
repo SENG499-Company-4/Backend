@@ -40,14 +40,11 @@ input CourseIDInput {
   """Course code, e.g. 499, 310"""
   code: String!
 
+  """Number of sections in the course"""
+  sections: Int!
+
   """Course subject, e.g. SENG, CSC"""
   subject: String!
-
-  """Term course is offered in"""
-  term: Term!
-
-  """Year course is offered in"""
-  year: Int!
 }
 
 type CoursePreference {

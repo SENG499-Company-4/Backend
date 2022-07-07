@@ -19,10 +19,6 @@ export const CourseIDInput = inputObjectType({
   definition(t) {
     t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
     t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
-    t.nonNull.field('term', {
-      type: Term,
-      description: 'Term course is offered in',
-    });
-    t.nonNull.int('year', { description: 'Year course is offered in' });
+    t.nonNull.int('sections', { description: 'Number of sections in the course' });
   },
 });
