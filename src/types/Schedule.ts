@@ -191,8 +191,7 @@ export const ScheduleQuery = extendType({
 
         // Return error if latest schedule does not exist
         if (!latestSchedule) {
-          console.log('No schedule found for year ' + year);
-          return;
+          return null;
         }
 
         // Fetch meeting times from the latest schedule
