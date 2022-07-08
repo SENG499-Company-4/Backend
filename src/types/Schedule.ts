@@ -3,7 +3,6 @@ import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'n
 import fetch from 'node-fetch';
 import { CourseSection } from './Course/Section';
 import { Date } from './Date';
-import { MeetingTime } from './Course/MeetingTime';
 import { Response } from './Response';
 import { Term } from './Term';
 
