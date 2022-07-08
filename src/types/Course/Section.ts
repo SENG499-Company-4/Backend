@@ -45,13 +45,22 @@ export const CourseQuery = extendType({
           await (prisma as PrismaClient).course.findMany({
             where: { term: term ?? undefined, year: year ?? undefined },
           })
-        ).map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-          const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
-            where: {
-              course: {
-                id,
+        ).map(async ({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
+          // If meetingTime.day is undefined set it to sunday
+          const meetingTimes = (
+            await (prisma as PrismaClient).meetingTime.findMany({
+              where: {
+                course: {
+                  id,
+                },
               },
-            },
+            })
+          ).map(({ day, startTime, endTime }) => {
+            return {
+              day: day ?? 'SUNDAY',
+              startTime,
+              endTime,
+            };
           });
           return {
             CourseID: {
@@ -61,7 +70,7 @@ export const CourseQuery = extendType({
               year,
             },
             hoursPerWeek: weeklyHours,
-            capacity,
+            capacity: capacity ?? 0,
             professors: professorId,
             startDate,
             endDate,
