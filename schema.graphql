@@ -38,6 +38,9 @@ type CourseID {
   """Term course is offered in"""
   term: Term!
 
+  """Course Title e.g. Introduction to Artificial Intelligence"""
+  title: String
+
   """Year course is offered in"""
   year: Int!
 }
@@ -201,7 +204,7 @@ type Query {
   """
   Schedule for a given term. If year is given, returns the most recent schedule generated for that year.
   """
-  schedule(year: Int): String
+  schedule(year: Int): Schedule
 
   """Get Teaching Preference Survey for the current user"""
   survey: TeachingPreferenceSurvey!
