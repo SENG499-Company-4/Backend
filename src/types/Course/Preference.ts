@@ -38,8 +38,8 @@ export const CoursePreferenceInput = inputObjectType({
 export const CreateTeachingPreferenceInput = inputObjectType({
   name: 'CreateTeachingPreferenceInput',
   definition(t) {
-    t.nonNull.boolean('peng', { description: 'If course requires Professional Engineer Professor' });
-    t.nonNull.id('userId', { description: 'New name of user' });
+    t.nonNull.boolean('peng');
+    t.nonNull.id('userId');
     t.nonNull.list.nonNull.field('CoursePreferenceInput', {
       type: CoursePreferenceInput,
     });
@@ -50,6 +50,9 @@ export const CreateTeachingPreferenceInput = inputObjectType({
     t.string('reliefReason');
     t.nonNull.boolean('hasTopic');
     t.string('topicDescription');
+    t.nonNull.int('maxFallCapacity');
+    t.nonNull.int('maxSpringCapacity');
+    t.nonNull.int('maxSummerCapacity');
   },
 });
 

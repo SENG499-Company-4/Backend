@@ -83,14 +83,13 @@ input CreateTeachingPreferenceInput {
   CoursePreferenceInput: [CoursePreferenceInput!]!
   hasRelief: Boolean!
   hasTopic: Boolean!
+  maxFallCapacity: Int!
+  maxSpringCapacity: Int!
+  maxSummerCapacity: Int!
   nonTeachingTerm: Term!
-
-  """If course requires Professional Engineer Professor"""
   peng: Boolean!
   reliefReason: String
   topicDescription: String
-
-  """New name of user"""
   userId: ID!
 }
 
