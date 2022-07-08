@@ -73,7 +73,11 @@ export const CourseQuery = extendType({
             },
             hoursPerWeek: weeklyHours,
             capacity: capacity ?? 0,
-            professors: professorId,
+            professors: await (prisma as PrismaClient).user.findMany({
+              where: {
+                id: professorId,
+              },
+            }),
             startDate,
             endDate,
             meetingTimes,
