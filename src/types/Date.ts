@@ -9,10 +9,11 @@ import { scalarType } from 'nexus';
 export const Date = scalarType({
   name: 'Date',
   asNexusMethod: 'date',
-  parseValue(value: string | number | Date | unknown) {
-    if (typeof value === 'string' || typeof value === 'number') {
-      return new Date(value);
-    }
+  parseValue() {
+    return;
+    // if (typeof value === 'string' || typeof value === 'number') {
+    //   return new Date(value);
+    // }
   },
   serialize() {
     return '1999-01-01T00:00:00.000Z';
