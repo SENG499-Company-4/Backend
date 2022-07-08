@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import fetch from 'node-fetch';
 import { Company } from './Company';
@@ -45,51 +44,51 @@ export const ScheduleMutation = extendType({
       args: {
         input: arg({ type: nonNull(GenerateScheduleInput) }),
       },
-      resolve: async (_, { input: { algorithm1, term } }, { prisma }) => {
+      resolve: async (_, { input: { algorithm1 } }) => {
         // TODO: Replace second url with correct one for company 3 algorithm 1
         const url =
           algorithm1 === 'COMPANY4'
             ? 'https://seng499company4algorithm1.herokuapp.com/generate_schedule'
             : "'https://seng499company4algorithm1.herokuapp.com/generate_schedule'";
 
-        const fallCourses =
-          term === 'FALL'
-            ? (prisma as PrismaClient).course.findMany({
-                where: {
-                  term: 'FALL',
-                },
-              })
-            : [];
+        // const fallCourses =
+        //   term === 'FALL'
+        //     ? (prisma as PrismaClient).course.findMany({
+        //         where: {
+        //           term: 'FALL',
+        //         },
+        //       })
+        //     : [];
 
-        const springCourses =
-          term === 'SPRING'
-            ? (prisma as PrismaClient).course.findMany({
-                where: {
-                  term: 'SPRING',
-                },
-              })
-            : [];
+        // const springCourses =
+        //   term === 'SPRING'
+        //     ? (prisma as PrismaClient).course.findMany({
+        //         where: {
+        //           term: 'SPRING',
+        //         },
+        //       })
+        //     : [];
 
-        const summerCourses =
-          term === 'SUMMER'
-            ? (
-                await (prisma as PrismaClient).course.findMany({
-                  where: {
-                    term: 'SUMMER',
-                  },
-                })
-              ).map((course) => {
-                const meetingTime = (prisma as PrismaClient).meetingTime.findMany({});
+        // const summerCourses =
+        //   term === 'SUMMER'
+        //     ? (
+        //         await (prisma as PrismaClient).course.findMany({
+        //           where: {
+        //             term: 'SUMMER',
+        //           },
+        //         })
+        //       ).map((course) => {
+        //         const meetingTime = (prisma as PrismaClient).meetingTime.findMany({});
 
-                return {
-                  courseNumber: course.code,
-                  subject: course.subject,
-                  sequenceNumber: 'string',
-                  courseTitle: 'string',
-                  meetingTime: {},
-                };
-              })
-            : [];
+        //         return {
+        //           courseNumber: course.code,
+        //           subject: course.subject,
+        //           sequenceNumber: 'string',
+        //           courseTitle: 'string',
+        //           meetingTime: {},
+        //         };
+        //       })
+        //     : [];
 
         const response = await fetch(url, {
           method: 'POST',
