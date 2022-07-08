@@ -119,7 +119,7 @@ type Error {
 input GenerateScheduleInput {
   algorithm1: Company!
   algorithm2: Company!
-  courses: [CourseInput]
+  courses: [CourseInput!]
   term: Term!
   year: Int!
 }

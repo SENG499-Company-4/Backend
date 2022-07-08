@@ -12,7 +12,7 @@ export const GenerateScheduleInput = inputObjectType({
   definition(t) {
     t.nonNull.int('year');
     t.nonNull.field('term', { type: Term });
-    t.list.field('courses', { type: CourseInput });
+    t.list.field('courses', { type: nonNull(CourseInput) });
     t.nonNull.field('algorithm1', { type: Company });
     t.nonNull.field('algorithm2', { type: Company });
   },
