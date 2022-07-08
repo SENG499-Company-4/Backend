@@ -18,7 +18,6 @@ export const Date = scalarType({
     return '1999-01-01T00:00:00.000Z';
   },
   parseLiteral(ast) {
-    return;
     if (ast.kind === Kind.INT) {
       return;
     }
