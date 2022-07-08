@@ -40,7 +40,34 @@ export const ScheduleMutation = extendType({
       args: {
         input: arg({ type: nonNull(GenerateScheduleInput) }),
       },
-      resolve: async () => {
+      resolve: async (_, { input }, { prisma }) => {
+        const courses_fall = await (prisma as PrismaClient).course.findMany({
+          where: {
+            year: input.year,
+            term: 'FALL',
+          },
+        });
+        const courses_spring = await (prisma as PrismaClient).course.findMany({
+          where: {
+            year: input.year,
+            term: 'SPRING',
+          },
+        });
+        const courses_summer = await (prisma as PrismaClient).course.findMany({
+          where: {
+            year: input.year,
+            term: 'SUMMER',
+          },
+        });
+        const fallTermCourses = courses_fall.map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
+            const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
+              where: {
+                courseID: id,
+              },
+            });
+            // TODO build falltermcourses
+        );
+
         const response = await fetch('https://seng499company4algorithm1.herokuapp.com/generate_schedule', {
           method: 'POST',
           headers: {
