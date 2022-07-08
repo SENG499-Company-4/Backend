@@ -46,30 +46,40 @@ model User {
   role Role @default(value: USER)
   preferences Preference[]
   professorSettings ProfessorSettings[]
-  courses Course[]
+  courses Section[]
   active Boolean @default(value: true)
 }
 
 model Course {
+  term Term
+  year Int
   id Int @id @default(autoincrement())
   subject String
   code String
-  term Term
-  year Int
-  weeklyHours Float
+  sections Section[]
+  peng Peng
+  weeklyHours Float?
   capacity Int?
   startDate DateTime?
   endDate DateTime?
-  peng Peng
+  @@unique([subject, code, year, term])
+}
+
+model Section {
   meetingTimes MeetingTime[]
   professor User @relation(fields: [professorId], references: [id])
   professorId Int @default(value: 35)
+  code String
+  course Course @relation(fields: [courseId], references: [id])
+  courseId Int
+  @@unique([code, courseId])
 }
 
 model MeetingTime {
   id Int @id @default(autoincrement())
-  course Course @relation(fields: [courseID], references: [id])
-  courseID Int
+  course Section @relation(fields: [sectionCode, sectionCourseId], references: [code, courseId])
+  sectionCode String
+  sectionCourseId Int
   day Day?
   startTime DateTime?
   endTime DateTime?
