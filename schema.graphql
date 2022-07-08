@@ -41,6 +41,18 @@ type CoursePreference {
   preference: Int!
 }
 
+input CoursePreferenceInput {
+  """Course code, e.g. 499, 310"""
+  code: String!
+  preference: Int!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
+
+  """Term course is offered in"""
+  term: Term!
+}
+
 """
 A set of CourseSections with matching CourseID represent a course offering
 """
@@ -65,6 +77,21 @@ type CourseSection {
 
   """The start date of the course"""
   startDate: Date!
+}
+
+input CreateTeachingPreferenceInput {
+  CoursePreferenceInput: [CoursePreferenceInput!]!
+  hasRelief: Boolean!
+  hasTopic: Boolean!
+  nonTeachingTerm: Term!
+
+  """If course requires Professional Engineer Professor"""
+  peng: Boolean!
+  reliefReason: String
+  topicDescription: String
+
+  """New name of user"""
+  userId: ID!
 }
 
 input CreateUserInput {
@@ -139,6 +166,9 @@ type Mutation {
 }
 
 type Query {
+  """Get all courses preferences"""
+  coursePreferences: CoursePreference!
+
   """Get a list of courses for a given term and/or year"""
   courses(term: Term, year: Int): [CourseSection!]
 

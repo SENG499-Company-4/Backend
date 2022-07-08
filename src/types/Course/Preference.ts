@@ -112,9 +112,9 @@ export const ScheduleMutation = extendType({
       args: {
         input: arg({ type: nonNull(CreateTeachingPreferenceInput) }),
       },
-      resolve: async (_, { input: { peng, userId, courses, nonTeachingTerm, hasRelief, reliefReason, hasTopic, topicDescription } }, { prisma }) => {
-        
-        return { success: true, message: 'Password updated'};
+      resolve: async () => {
+        // resolve: async (_, { input: { peng, userId, courses, nonTeachingTerm, hasRelief, reliefReason, hasTopic, topicDescription } }, { prisma }) => {
+        return { success: false, message: 'Not Implemented' };
       },
     });
   },
