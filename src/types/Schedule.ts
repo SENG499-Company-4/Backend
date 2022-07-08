@@ -181,7 +181,7 @@ export const ScheduleQuery = extendType({
         year: intArg(),
       },
       resolve: async (_, { year }, { prisma }) => {
-        const latestSchedule = await (prisma as PrismaClient).schedule.findFirst({
+        const schedule = await (prisma as PrismaClient).schedule.findFirst({
           where: {
             year:
               year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
@@ -189,16 +189,15 @@ export const ScheduleQuery = extendType({
         });
 
         // Return error if latest schedule does not exist
-        if (!latestSchedule) {
-          console.log('No schedule found for year ' + year);
-          return;
+        if (!schedule) {
+          return null;
         }
 
         // Fetch meeting times from the latest schedule
         const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
           where: {
             schedule: {
-              id: latestSchedule.id,
+              id: schedule.id,
             },
           },
         });
@@ -223,9 +222,9 @@ export const ScheduleQuery = extendType({
 
         // Return schedule object
         return {
-          id: latestSchedule.id,
-          year: latestSchedule.year,
-          createdAt: latestSchedule.createdAt,
+          id: schedule.id,
+          year: schedule.year,
+          createdAt: schedule.createdAt,
           courses: courses.map((course) => ({
             CourseID: {
               subject: course.subject,
