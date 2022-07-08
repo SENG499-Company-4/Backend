@@ -41,33 +41,50 @@ export const CourseQuery = extendType({
         year: arg({ type: 'Int' }),
       },
       resolve: async (_, { term, year }, { prisma }) => {
-        return (
-          await (prisma as PrismaClient).course.findMany({
-            where: { term: term ?? undefined, year: year ?? undefined },
-          })
-        ).map(({ id, subject, code, term, year, weeklyHours, capacity, professorId, startDate, endDate }) => {
-          const meetingTimes = (prisma as PrismaClient).meetingTime.findMany({
+        const courses = await (prisma as PrismaClient).course.findMany({
+          where: { term: term ?? undefined, year: year ?? undefined },
+        });
+        const meetingTimes = (
+          await (prisma as PrismaClient).meetingTime.findMany({
             where: {
               course: {
-                id,
+                id: {
+                  in: courses.map(({ id }) => id),
+                },
               },
             },
-          });
-          return {
-            CourseID: {
-              subject,
-              code,
-              term,
-              year,
-            },
-            hoursPerWeek: weeklyHours,
-            capacity,
-            professors: professorId,
-            startDate,
-            endDate,
-            meetingTimes,
-          };
-        });
+          })
+        ).map(({ courseID, day, startTime, endTime, scheduleID }) => ({
+          courseID: {
+            subject: courses.find(({ id }) => id === courseID)?.subject,
+            code: courses.find(({ id }) => id === courseID)?.code,
+            term: courses.find(({ id }) => id === courseID)?.term,
+            year: courses.find(({ id }) => id === courseID)?.year,
+          },
+          day: day ?? 'SUNDAY',
+          startTime,
+          endTime,
+          scheduleID,
+        }));
+        return courses.map((course) => ({
+          CourseID: {
+            subject: course.subject,
+            code: course.code,
+            term: course.term,
+            year: course.year,
+          },
+          hoursPerWeek: course.weeklyHours,
+          capacity: course.capacity ?? 0,
+          startDate: course.startDate,
+          endDate: course.endDate,
+          meetingTimes: meetingTimes.filter(
+            ({ courseID }) =>
+              courseID.subject === course.subject &&
+              courseID.code === course.code &&
+              courseID.term === course.term &&
+              courseID.year === course.year
+          ),
+        }));
       },
     });
   },
