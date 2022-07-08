@@ -173,7 +173,7 @@ export const ScheduleMutation = extendType({
 export const ScheduleQuery = extendType({
   type: 'Query',
   definition(t) {
-    t.string('schedule', {
+    t.field('schedule', {
       type: Schedule,
       description:
         'Schedule for a given term. If year is given, returns the most recent schedule generated for that year.',
@@ -201,6 +201,9 @@ export const ScheduleQuery = extendType({
             },
           },
         });
+        if (!meetingTimes) {
+          return null;
+        }
 
         // Fetch courses from the latest schedule
         const courses = await (prisma as PrismaClient).course.findMany({
@@ -222,22 +225,31 @@ export const ScheduleQuery = extendType({
 
         // Return schedule object
         return {
-          id: schedule.id,
-          year: schedule.year,
+          id: String(schedule.id),
+          year: schedule.year ?? 0,
           createdAt: schedule.createdAt,
           courses: courses.map((course) => ({
             CourseID: {
               subject: course.subject,
               code: course.code,
               term: course.term,
-              year,
+              year: year ?? 0,
             },
             hoursPerWeek: course.weeklyHours,
-            capacity: course.capacity,
+            capacity: course.capacity ?? 0,
             professors: users.filter((prof) => prof.id === course.professorId),
             startDate: course.startDate,
             endDate: course.endDate,
-            meetingTimes: meetingTimes.filter((meetingTime) => meetingTime.courseID === course.id),
+            meetingTimes: meetingTimes
+              .filter((meetingTime) => meetingTime.courseID === course.id)
+              .map(({ id, courseID, day, startTime, endTime, scheduleID }) => ({
+                id: id,
+                courseID: courseID,
+                day: day ?? 'SUNDAY',
+                startTime: startTime,
+                endTime: endTime,
+                scheduleID: scheduleID,
+              })),
           })),
         };
       },
