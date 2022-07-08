@@ -38,13 +38,13 @@ export type Algo1Course = {
   prof?: Professor;
 };
 
-export type Algorithm1Input = {
+export type Algorithm1 = {
   fallCourses: Algo1Course[];
   springCourses: Algo1Course[];
   summerCourses: Algo1Course[];
 };
 
-export type Algorithm2Input = {
+export type Algorithm2 = {
   subject: string;
   code: string;
   seng_ratio: number;

@@ -2,7 +2,7 @@
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import fetch from 'node-fetch';
 import { Course, PrismaClient } from '@prisma/client';
-import { Algo1Course, Algorithm1Input, Algorithm2Input } from '../utils/types';
+import { Algo1Course, Algorithm1, Algorithm2 } from '../utils/types';
 import { usePost } from '../utils/api';
 import { prisma } from '../context';
 import { Company } from './Company';
@@ -56,46 +56,46 @@ export const ScheduleMutation = extendType({
 
         const algo1url =
           algorithm1 === 'COMPANY4'
-            ? 'https://seng499company4algorithm1.herokuapp.com/generate_schedule'
-            : "'https://seng499company4algorithm1.herokuapp.com/generate_schedule'";
+            ? 'https://seng499company4algorithm1.herokuapp.com/schedule'
+            : "'https://seng499company4algorithm1.herokuapp.com/schedule'";
 
         const algo2Url =
           algorithm2 === 'COMPANY3'
-            ? 'https://algorithm-2.herokuapp.com/'
-            : 'https://seng499company4algorithm2.herokuapp.com/';
+            ? 'https://algorithm-2.herokuapp.com/predict_class_size'
+            : 'https://seng499company4algorithm2.herokuapp.com/predict_class_size';
 
         // Create or update the provided courses in the DB
-        const newCourses: Course[] = [];
-        courses.forEach(async ({ subject, code }) => {
-          const newCourse = await (prisma as PrismaClient).course.upsert({
-            create: {
-              subject,
-              code,
-              term,
-              year,
-              peng: 'NOTREQUIRED',
-              capacity: 0,
-            },
-            update: {
-              subject,
-              code,
-              term,
-              year,
-              capacity: 0,
-            },
-            where: {
-              subject_code_year_term: {
+        const newCourses: Course[] = await Promise.all(
+          courses.map(async ({ subject, code }) => {
+            return await (prisma as PrismaClient).course.upsert({
+              create: {
+                subject,
                 code,
                 term,
                 year,
-                subject,
+                peng: 'NOTREQUIRED',
+                capacity: 0,
               },
-            },
-          });
-          newCourses.push(newCourse);
-        });
+              update: {
+                subject,
+                code,
+                term,
+                year,
+                capacity: 0,
+              },
+              where: {
+                subject_code_year_term: {
+                  code,
+                  term,
+                  year,
+                  subject,
+                },
+              },
+            });
+          })
+        );
 
-        const courseInput: Algorithm2Input[] = newCourses.map(({ code, subject, capacity }) => {
+        const courseInput: Algorithm2[] = newCourses.map(({ code, subject, capacity }) => {
           return {
             code,
             subject,
@@ -105,7 +105,7 @@ export const ScheduleMutation = extendType({
           };
         });
 
-        const courseCapacities = await usePost<Algorithm2Input[], Algorithm2Input[]>(algo2Url, courseInput);
+        const courseCapacities = await usePost<Algorithm2[], Algorithm2[]>(algo2Url, courseInput);
 
         console.log(courseCapacities);
 
@@ -130,7 +130,7 @@ export const ScheduleMutation = extendType({
         const summerCourses: Algo1Course[] = term === 'SUMMER' ? [] : [];
         const springCourses: Algo1Course[] = term === 'SPRING' ? [] : [];
 
-        const generatedSchedule = await usePost<Algorithm1Input, Algorithm1Input>(algo1url, {
+        const generatedSchedule = await usePost<Algorithm1, Algorithm1>(algo1url, {
           fallCourses,
           summerCourses,
           springCourses,
