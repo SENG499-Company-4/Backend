@@ -14,11 +14,11 @@ export const CourseID = objectType({
   },
 });
 
-export const CourseIDInput = inputObjectType({
-  name: 'CourseIDInput',
+export const CourseInput = inputObjectType({
+  name: 'CourseInput',
   definition(t) {
     t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
     t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
-    t.nonNull.int('sections', { description: 'Number of sections in the course' });
+    t.nonNull.int('section', { description: 'Number of sections in the course' });
   },
 });

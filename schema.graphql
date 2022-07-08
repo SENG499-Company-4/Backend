@@ -42,12 +42,12 @@ type CourseID {
   year: Int!
 }
 
-input CourseIDInput {
+input CourseInput {
   """Course code, e.g. 499, 310"""
   code: String!
 
   """Number of sections in the course"""
-  sections: Int!
+  section: Int!
 
   """Course subject, e.g. SENG, CSC"""
   subject: String!
@@ -119,7 +119,7 @@ type Error {
 input GenerateScheduleInput {
   algorithm1: Company!
   algorithm2: Company!
-  courses: [CourseIDInput]
+  courses: [CourseInput]
   term: Term!
   year: Int!
 }

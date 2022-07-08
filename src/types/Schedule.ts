@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import fetch from 'node-fetch';
 import { Company } from './Company';
-import { CourseIDInput } from './Course';
+import { CourseInput } from './Course';
 import { CourseSection } from './Course/Section';
 import { Date } from './Date';
 import { Response } from './Response';
@@ -13,7 +13,7 @@ export const GenerateScheduleInput = inputObjectType({
   definition(t) {
     t.nonNull.int('year');
     t.nonNull.field('term', { type: Term });
-    t.list.field('courses', { type: CourseIDInput });
+    t.list.field('courses', { type: CourseInput });
     t.nonNull.field('algorithm1', { type: Company });
     t.nonNull.field('algorithm2', { type: Company });
   },
