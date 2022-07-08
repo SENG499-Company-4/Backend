@@ -22,6 +22,12 @@ input ChangeUserPasswordInput {
   newPassword: String!
 }
 
+"""Company 3 and 4"""
+enum Company {
+  COMPANY3
+  COMPANY4
+}
+
 type CourseID {
   """Course code, e.g. 499, 310"""
   code: String!
@@ -32,8 +38,22 @@ type CourseID {
   """Term course is offered in"""
   term: Term!
 
+  """Course Title e.g. Introduction to Artificial Intelligence"""
+  title: String
+
   """Year course is offered in"""
   year: Int!
+}
+
+input CourseInput {
+  """Course code, e.g. 499, 310"""
+  code: String!
+
+  """Number of sections in the course"""
+  section: Int!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
 }
 
 type CoursePreference {
@@ -126,6 +146,10 @@ type Error {
 }
 
 input GenerateScheduleInput {
+  algorithm1: Company!
+  algorithm2: Company!
+  courses: [CourseInput!]
+  term: Term!
   year: Int!
 }
 
@@ -180,7 +204,7 @@ type Query {
   """
   Schedule for a given term. If year is given, returns the most recent schedule generated for that year.
   """
-  schedule(year: Int): String
+  schedule(year: Int): Schedule
 
   """Get Teaching Preference Survey for the current user"""
   survey: TeachingPreferenceSurvey!

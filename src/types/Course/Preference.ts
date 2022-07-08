@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { arg, extendType, inputObjectType, nonNull, objectType } from 'nexus';
+import { PrismaClient, Term } from '@prisma/client';
 import { getUserId } from '../../utils/auth';
 import { Response } from '../Response';
-import { Term } from '../Term';
+import { Term as TermType } from '../Term';
 import { CourseID } from './ID';
 
 export const CoursePreference = objectType({
@@ -28,7 +28,7 @@ export const CoursePreferenceInput = inputObjectType({
     t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
     t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
     t.nonNull.field('term', {
-      type: Term,
+      type: TermType,
       description: 'Term course is offered in',
     });
     t.nonNull.int('preference');
@@ -44,7 +44,7 @@ export const CreateTeachingPreferenceInput = inputObjectType({
       type: CoursePreferenceInput,
     });
     t.nonNull.field('nonTeachingTerm', {
-      type: Term,
+      type: TermType,
     });
     t.nonNull.boolean('hasRelief');
     t.string('reliefReason');
@@ -71,11 +71,34 @@ export const PreferenceQuery = extendType({
           },
         });
 
-        const courses = prefs.map(({ courseID, rank }) => ({
-          id: courseID,
-          preference: rank,
-        }));
+        const courses = prefs.map(async ({ courseID, rank }) => {
+          const courseData = await (prisma as PrismaClient).course.findUnique({
+            where: {
+              id: courseID,
+            },
+          });
 
+          if (!courseData) {
+            return {
+              id: {
+                subject: '',
+                code: '',
+                term: '' as Term,
+                year: 0,
+              },
+              preference: 0,
+            };
+          }
+          return {
+            id: {
+              subject: courseData.subject,
+              code: courseData.code,
+              term: courseData.term,
+              year: courseData.year,
+            },
+            preference: rank ?? 0,
+          };
+        });
         return {
           courses,
         };
@@ -93,11 +116,34 @@ export const AllPreferencesQuery = extendType({
       resolve: async (_, __, { prisma }) => {
         const prefs = await (prisma as PrismaClient).preference.findMany();
 
-        const courses = prefs.map(({ courseID, rank }) => ({
-          id: courseID,
-          preference: rank,
-        }));
+        const courses = prefs.map(async ({ courseID, rank }) => {
+          const courseData = await (prisma as PrismaClient).course.findUnique({
+            where: {
+              id: courseID,
+            },
+          });
 
+          if (!courseData) {
+            return {
+              id: {
+                subject: '',
+                code: '',
+                term: '' as Term,
+                year: 0,
+              },
+              preference: 0,
+            };
+          }
+          return {
+            id: {
+              subject: courseData.subject,
+              code: courseData.code,
+              term: courseData.term,
+              year: courseData.year,
+            },
+            preference: rank ?? 0,
+          };
+        });
         return {
           courses,
         };
