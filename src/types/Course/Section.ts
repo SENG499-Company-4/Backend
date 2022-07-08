@@ -55,11 +55,13 @@ export const CourseQuery = extendType({
                 },
               },
             })
-          ).map(({ day, startTime, endTime }) => {
+          ).map(({ courseID, day, startTime, endTime, scheduleID }) => {
             return {
+              courseID,
               day: day ?? 'SUNDAY',
               startTime,
               endTime,
+              scheduleID,
             };
           });
           return {
