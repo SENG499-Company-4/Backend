@@ -22,6 +22,12 @@ input ChangeUserPasswordInput {
   newPassword: String!
 }
 
+"""Company 3 and 4"""
+enum Company {
+  COMPANY3
+  COMPANY4
+}
+
 type CourseID {
   """Course code, e.g. 499, 310"""
   code: String!
@@ -34,6 +40,17 @@ type CourseID {
 
   """Year course is offered in"""
   year: Int!
+}
+
+input CourseInput {
+  """Course code, e.g. 499, 310"""
+  code: String!
+
+  """Number of sections in the course"""
+  section: Int!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
 }
 
 type CoursePreference {
@@ -126,6 +143,10 @@ type Error {
 }
 
 input GenerateScheduleInput {
+  algorithm1: Company!
+  algorithm2: Company!
+  courses: [CourseInput!]
+  term: Term!
   year: Int!
 }
 
