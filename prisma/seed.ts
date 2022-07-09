@@ -1,7 +1,9 @@
-import { PrismaClient, Term, Peng, Role } from '@prisma/client';
+import { PrismaClient, Term, Peng, Role, Day } from '@prisma/client';
 import { partition, randomNumber } from '../src/utils/helpers';
 import courseData from './static/courses.json';
 import userData from './static/users.json';
+import scheduleData from './static/schedules.json';
+import meetingTimeData from './static/meetingTimes.json';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -56,6 +58,29 @@ async function main() {
           startDate: new Date(courseObj.startDate),
           endDate: new Date(courseObj.endDate),
           peng: courseObj.peng as Peng,
+        },
+      });
+    }
+  }
+  if ((await prisma.schedule.count()) === 0) {
+    for (const scheduleObj of scheduleData) {
+      await (prisma as PrismaClient).schedule.create({
+        data: {
+          year: scheduleObj.year,
+          createdAt: new Date(scheduleObj.createdAt),
+        },
+      });
+    }
+  }
+  if ((await prisma.meetingTime.count()) === 0) {
+    for (const meetingTimeObj of meetingTimeData) {
+      await (prisma as PrismaClient).meetingTime.create({
+        data: {
+          courseID: meetingTimeObj.courseID,
+          day: meetingTimeObj.day as Day,
+          startTime: new Date(meetingTimeObj.startTime),
+          endTime: new Date(meetingTimeObj.endTime),
+          scheduleID: meetingTimeObj.scheduleID,
         },
       });
     }
