@@ -4,7 +4,7 @@
   "description": "Back end code repository for SENG499 Summer 2022 project.",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "nodemon --transpile-only src/index.ts",
     "build": "tsc",
     "lint": "eslint \"src/**/*.{t,j}s{x,}\"",
@@ -31,6 +31,7 @@
   "homepage": "https://github.com/SENG499-Company-4/Backend#readme",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/jest": "^28.1.4",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^18.0.0",
     "@types/node-fetch": "^2.6.2",
@@ -40,8 +41,10 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^28.1.2",
     "nodemon": "^2.0.16",
     "prettier": "^2.6.2",
+    "ts-jest": "^28.0.5",
     "ts-node-dev": "^1.1.8"
   },
   "dependencies": {
