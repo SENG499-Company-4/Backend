@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
-import { arg, enumType, extendType, idArg, inputObjectType, intArg, nonNull, objectType, stringArg } from 'nexus';
+import { arg, enumType, extendType, idArg, inputObjectType, intArg, list, nonNull, objectType, stringArg } from 'nexus';
 import { generateToken, getUserId } from '../utils/auth';
 import generateHashPassword from '../utils/hash';
 import { CoursePreference } from './Course/Preference';
@@ -257,6 +257,13 @@ export const UserQuery = extendType({
             id,
           },
         });
+      },
+    });
+    t.field('allUsers', {
+      type: list(nonNull(User)),
+      description: 'Get all users',
+      resolve: async (_, __, { prisma }) => {
+        return await (prisma as PrismaClient).user.findMany();
       },
     });
   },

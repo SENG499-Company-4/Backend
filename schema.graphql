@@ -163,6 +163,9 @@ type Mutation {
 }
 
 type Query {
+  """Get all users"""
+  allUsers: [User!]
+
   """Get a list of courses for a given term and/or year"""
   courses(term: Term, year: Int): [CourseSection!]
 
