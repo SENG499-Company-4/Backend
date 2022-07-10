@@ -66,7 +66,7 @@ export const ScheduleMutation = extendType({
 
         // Create or update the provided courses in the DB
         const newCourses: Course[] = await Promise.all(
-          courses.map(async ({ subject, code }) => {
+          courses.map(async ({ subject, code }: { subject: string; code: string }) => {
             return await (prisma as PrismaClient).course.upsert({
               create: {
                 subject,
