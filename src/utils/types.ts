@@ -1,16 +1,16 @@
 type Assignment = {
   startDate: string;
   endDate: string;
-  beginTime: string;
-  endTime: string;
-  hoursWeek: number;
-  sunday: boolean;
-  monday: boolean;
-  tuesday: boolean;
-  wednesday: boolean;
-  thursday: boolean;
-  friday: boolean;
-  saturday: boolean;
+  beginTime?: string;
+  endTime?: string;
+  hoursWeek?: number;
+  sunday?: boolean;
+  monday?: boolean;
+  tuesday?: boolean;
+  wednesday?: boolean;
+  thursday?: boolean;
+  friday?: boolean;
+  saturday?: boolean;
 };
 
 type Preference = {
