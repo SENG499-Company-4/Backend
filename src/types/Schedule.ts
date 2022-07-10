@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import { Course, PrismaClient } from '@prisma/client';
