@@ -106,6 +106,8 @@ export const ScheduleMutation = extendType({
 
         const courseCapacities = await usePost<Algorithm2[], Algorithm2[]>(algo2Url, courseInput);
 
+        return { success: true, message: JSON.stringify(courseCapacities) };
+
         // Update capacities in the database
         courseCapacities.forEach(async ({ code, subject, semester, capacity }) => {
           await (prisma as PrismaClient).course.update({
@@ -184,89 +186,90 @@ export const ScheduleMutation = extendType({
   },
 });
 
-// export const ScheduleQuery = extendType({
-//   type: 'Query',
-//   definition(t) {
-//     t.field('schedule', {
-//       type: Schedule,
-//       description:
-//         'Schedule for a given term. If year is given, returns the most recent schedule generated for that year.',
-//       args: {
-//         year: intArg(),
-//       },
-//       resolve: async (_, { year }, { prisma }) => {
-//         const schedule = await (prisma as PrismaClient).schedule.findFirst({
-//           where: {
-//             year:
-//               year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
-//           },
-//         });
+export const ScheduleQuery = extendType({
+  type: 'Query',
+  definition(t) {
+    t.field('schedule', {
+      type: Schedule,
+      description:
+        'Schedule for a given term. If year is given, returns the most recent schedule generated for that year.',
+      args: {
+        year: intArg(),
+      },
+      resolve: async (_, { year }, { prisma }) => {
+        const schedule = await (prisma as PrismaClient).schedule.findFirst({
+          where: {
+            year:
+              year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
+          },
+        });
 
-//         // Return error if latest schedule does not exist
-//         if (!schedule) {
-//           return null;
-//         }
+        // Return error if latest schedule does not exist
+        if (!schedule) {
+          return null;
+        }
 
-//         // Fetch meeting times from the latest schedule
-//         const meetingTimes = await (prisma as PrismaClient).meetingTime.findMany({
-//           where: {
-//             schedule: {
-//               id: schedule.id,
-//             },
-//           },
-//         });
-//         if (!meetingTimes) {
-//           return null;
-//         }
+        // Fetch courses from the latest schedule
+        const courses = await (prisma as PrismaClient).course.findMany({
+          where: {
+            scheduleID: schedule.id,
+          },
+        });
 
-//         // Fetch courses from the latest schedule
-//         const courses = await (prisma as PrismaClient).course.findMany({
-//           where: {
-//             id: {
-//               in: meetingTimes.map((meetingTime) => meetingTime.courseID),
-//             },
-//           },
-//         });
+        // Fetch sections for the course
+        const sections = await (prisma as PrismaClient).section.findMany({
+          where: {
+            courseId: {
+              in: courses.map(({ id }) => id),
+            },
+          },
+        });
 
-//         // Fetch profs for the course
-//         const users = await (prisma as PrismaClient).user.findMany({
-//           where: {
-//             id: {
-//               in: courses.map((course) => course.professorId),
-//             },
-//           },
-//         });
+        const courseSections = await Promise.all(
+          sections.map(async (section) => ({
+            ...section,
+            course: courses.find((course) => course.id === section.courseId),
+            professor: await (prisma as PrismaClient).user.findMany({
+              where: {
+                id: section.professorId ?? 0,
+              },
+            }),
+            meetingTimes: await (prisma as PrismaClient).meetingTime.findMany({
+              where: {
+                sectionCourseId: section.courseId,
+              },
+            }),
+          }))
+        );
 
-//         // Return schedule object
-//         return {
-//           id: String(schedule.id),
-//           year: schedule.year ?? 0,
-//           createdAt: schedule.createdAt,
-//           courses: courses.map((course) => ({
-//             CourseID: {
-//               subject: course.subject,
-//               code: course.code,
-//               term: course.term,
-//               year: year ?? 0,
-//             },
-//             hoursPerWeek: course.weeklyHours,
-//             capacity: course.capacity ?? 0,
-//             professors: users.filter((prof) => prof.id === course.professorId),
-//             startDate: course.startDate,
-//             endDate: course.endDate,
-//             meetingTimes: meetingTimes
-//               .filter((meetingTime) => meetingTime.courseID === course.id)
-//               .map(({ id, courseID, day, startTime, endTime, scheduleID }) => ({
-//                 id: id,
-//                 courseID: courseID,
-//                 day: day ?? 'SUNDAY',
-//                 startTime: startTime,
-//                 endTime: endTime,
-//                 scheduleID: scheduleID,
-//               })),
-//           })),
-//         };
-//       },
-//     });
-//   },
-// });
+        // Return schedule object
+        return {
+          id: String(schedule.id),
+          year: schedule.year ?? 0,
+          createdAt: schedule.createdAt,
+          courses: courseSections.map(({ course, professor, meetingTimes }) => ({
+            CourseID: {
+              subject: course!.subject,
+              code: course!.code,
+              term: course!.term,
+              year: year ?? 0,
+            },
+            hoursPerWeek: course!.weeklyHours ?? 0,
+            capacity: course!.capacity ?? 0,
+            professors: professor,
+            startDate: course!.startDate ?? new Date(),
+            endDate: course!.endDate ?? new Date(),
+            meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
+              id: id,
+              courseID: sectionCourseId,
+              day: day ?? 'SUNDAY',
+              startTime: startTime,
+              endTime: endTime,
+              scheduleID: schedule.id,
+            })),
+          })),
+        };
+      },
+    });
+  },
+});
