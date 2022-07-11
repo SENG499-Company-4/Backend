@@ -5,3 +5,5 @@ release:
   command:
     - npx -y prisma migrate deploy
   image: web
+run:
+  web: npm start
