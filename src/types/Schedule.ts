@@ -266,7 +266,7 @@ export const ScheduleQuery = extendType({
         const users = await (prisma as PrismaClient).user.findMany({
           where: {
             id: {
-              in: courses.map((course) => course.professorId),
+              in: courses.map((course) => course.professorId ?? 0),
             },
           },
         });
