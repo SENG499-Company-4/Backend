@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PrismaClient } from '@prisma/client';
 import { arg, extendType, objectType } from 'nexus';
-import { Date as ScalarDate } from '../Date';
+import { DateType as ScalarDate } from '../DateType';
 import { Term } from '../Term';
 import { User } from '../User';
 import { CourseID } from './ID';

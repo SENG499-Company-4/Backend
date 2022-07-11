@@ -8,7 +8,7 @@ import { prisma } from '../context';
 import { Company } from './Company';
 import { CourseInput } from './Course';
 import { CourseSection } from './Course/Section';
-import { Date as ScalarDate } from './Date';
+import { DateType as ScalarDate } from './DateType';
 import { Response } from './Response';
 import { Term } from './Term';
 
