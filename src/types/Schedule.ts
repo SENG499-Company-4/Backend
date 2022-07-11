@@ -334,6 +334,7 @@ export const ScheduleQuery = extendType({
       },
       resolve: async (_, { year }, { prisma }) => {
         const schedule = await (prisma as PrismaClient).schedule.findFirst({
+          orderBy: { createdAt: 'desc' },
           where: {
             year:
               year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
@@ -360,6 +361,8 @@ export const ScheduleQuery = extendType({
             },
           },
         });
+
+        console.log(courses);
 
         const courseSections = await Promise.all(
           sections.map(async (section) => ({
