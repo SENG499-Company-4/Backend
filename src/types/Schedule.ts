@@ -2,7 +2,7 @@
 /* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import { Course, PrismaClient } from '@prisma/client';
-import { Algo1Course, Algorithm1, Algorithm2 } from '../utils/types';
+import { Algo1Course, Algorithm1Input, Algorithm1Out, Algorithm2 } from '../utils/types';
 import { usePost } from '../utils/api';
 import { prisma } from '../context';
 import { Company } from './Company';
@@ -259,7 +259,7 @@ export const ScheduleMutation = extendType({
           });
         });
 
-        return { success: true, message: JSON.stringify(courseCapacities) };
+        // return { success: true, message: JSON.stringify(courseCapacities) };
 
         const dbCourses = await (prisma as PrismaClient).course.findMany({
           where: {
@@ -269,20 +269,29 @@ export const ScheduleMutation = extendType({
         });
 
         const courseSections: Algo1Course[] = await Promise.all(
-          dbCourses.map(async ({ code, subject, capacity, startDate, endDate }) => {
+          dbCourses.map(async ({ code, subject, capacity }) => {
             return {
               courseNumber: code,
               subject,
-              sequenceNumber: '1',
-              streamSequence: '1',
+              sequenceNumber: 'A01',
+              streamSequence: '2A',
               courseTitle: 'Calculus',
               courseCapacity: capacity,
               numSections: 1,
-              assignment: {
-                startDate: String(startDate),
-                endDate: String(endDate),
-              },
+              // assignment: {
+              //   startDate: String(startDate),
+              //   endDate: String(endDate),
+              // },
             };
+            // {
+            //   "courseNumber": "265",
+            //   "subject": "SENG",
+            //   "sequenceNumber": "A01",
+            //   "courseTitle": "Software Development Methods",
+            //   "streamSequence": "2A",
+            //   "numSections": 1,
+            //   "courseCapacity": 100
+            // },
           })
         );
 
@@ -290,11 +299,59 @@ export const ScheduleMutation = extendType({
         const summerCourses: Algo1Course[] = term === 'SUMMER' ? courseSections : [];
         const springCourses: Algo1Course[] = term === 'SPRING' ? courseSections : [];
 
-        const generatedSchedule = await usePost<Algorithm1, Algorithm1>(algo1url, {
-          fallCourses,
-          summerCourses,
-          springCourses,
+        // const professors = await Promise.all(
+        //   dbCourses.map(async ({ id }) => {
+        //     const preferences = await (prisma as PrismaClient).preference.findMany({
+        //       where: {
+        //         courseID: id,
+        //       },
+        //     });
+
+        //     return await Promise.all(
+        //       preferences.map(async ({ userID, rank }) => {
+        //         const user = await (prisma as PrismaClient).user.findUnique({
+        //           where: {
+        //             id: userID,
+        //           },
+        //         });
+
+        //         return {
+        //           displayName: user?.name ?? '',
+        //           {
+
+        //             preferenceNum: rank ?? 0,
+        //           }
+        //         };
+        //       })
+        //     );
+        //   })
+        // );
+
+        const preferences = await (prisma as PrismaClient).preference.findMany({
+          where: {
+            courseID: {
+              in: dbCourses.map(({ id }) => id),
+            },
+          },
         });
+
+        const professors = preferences.map((preference) => {});
+
+        const a: any = {
+          hardScheduled: {
+            fallCourses: [],
+            summerCourses: [],
+            springCourses: [],
+          },
+          coursesToSchedule: {
+            fallCourses,
+            summerCourses,
+            springCourses,
+          },
+          professors,
+        };
+
+        const generatedSchedule = await usePost<Algorithm1Input, Algorithm1Out>(algo1url, a);
 
         if (!generatedSchedule.fallCourses && !generatedSchedule.springCourses && !generatedSchedule.summerCourses) {
           return { success: false, message: 'No schedule was generated' };
@@ -361,8 +418,6 @@ export const ScheduleQuery = extendType({
             },
           },
         });
-
-        console.log(courses);
 
         const courseSections = await Promise.all(
           sections.map(async (section) => ({

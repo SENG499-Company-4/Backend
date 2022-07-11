@@ -38,7 +38,16 @@ export type Algo1Course = {
   prof?: Professor;
 };
 
-export type Algorithm1 = {
+export type Algorithm1Input = {
+  hardScheduled: { fallCourses: Algo1Course[]; springCourses: Algo1Course[]; summerCourses: Algo1Course[] };
+  coursesToSchedule: { fallCourses: Algo1Course[]; springCourses: Algo1Course[]; summerCourses: Algo1Course[] };
+  professors: {
+    displayName: string;
+    preferences: Preference[];
+  };
+};
+
+export type Algorithm1Out = {
   fallCourses: Algo1Course[];
   springCourses: Algo1Course[];
   summerCourses: Algo1Course[];

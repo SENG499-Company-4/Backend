@@ -65,7 +65,9 @@ model Course {
   endDate DateTime?
   schedule Schedule? @relation(fields: [scheduleID], references: [id])
   scheduleID Int?
+  preferences Preference[]
   @@unique([subject, code, year, term])
+  @@unique([id, subject, code, year, term])
 }
 
 model Section {
@@ -98,7 +100,12 @@ model Schedule {
 model Preference {
   user User @relation(fields: [userID], references: [id])
   userID Int
+  course Course @relation(fields: [courseID, courseCode, courseSubject, courseTerm, courseYear], references: [id, code, subject, term, year])
   courseID Int
+  courseSubject String
+  courseCode String
+  courseTerm Term
+  courseYear Int
   rank Int?
   @@id([userID, courseID])
 }

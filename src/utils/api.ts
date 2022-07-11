@@ -5,10 +5,10 @@ export const usePost = async <T, R>(url: string, body: T): Promise<R> => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      accept: 'application/json',
     },
     body: JSON.stringify(body),
   });
+  console.log(res);
 
   if (!res.ok) throw new Error('fail');
 
