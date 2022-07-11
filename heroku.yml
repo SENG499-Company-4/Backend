@@ -3,5 +3,5 @@ build:
     web: Dockerfile
 release:
   command:
-    - npx prisma migrate deploy
+    - npx -y prisma migrate deploy
   image: web
