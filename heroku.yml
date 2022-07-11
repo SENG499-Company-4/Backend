@@ -3,7 +3,7 @@ build:
     web: Dockerfile
 release:
   command:
-    - npx -y prisma migrate deploy && npm run schema
+    - npx -y prisma migrate deploy && npm run seed:users
   image: web
 run:
   web: npm start
