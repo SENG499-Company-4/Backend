@@ -17,7 +17,6 @@
     "seed": "prisma db seed",
     "start": "node dist/src/index.js",
     "db:reset": "npx prisma migrate reset",
-    "heroku-postbuild": "npx prisma migrate deploy && ts-node --transpile-only prisma/seed_prod.ts",
     "seed:users": "ts-node --transpile-only prisma/seed_prod.ts"
   },
   "repository": {
