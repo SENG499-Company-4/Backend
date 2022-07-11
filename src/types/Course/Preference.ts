@@ -40,6 +40,7 @@ export const CreateTeachingPreferenceInput = inputObjectType({
   definition(t) {
     t.nonNull.boolean('peng');
     t.nonNull.id('userId');
+    t.nonNull.int('year');
     t.nonNull.list.nonNull.field('CoursePreferenceInput', {
       type: CoursePreferenceInput,
     });
@@ -129,7 +130,7 @@ export const AllPreferencesQuery = extendType({
   },
 });
 
-export const ScheduleMutation = extendType({
+export const PreferenceMutation = extendType({
   type: 'Mutation',
   definition(t) {
     t.nonNull.field('createTeachingPreference', {
@@ -138,8 +139,69 @@ export const ScheduleMutation = extendType({
       args: {
         input: arg({ type: nonNull(CreateTeachingPreferenceInput) }),
       },
-      resolve: async () => {
-        // resolve: async (_, { input: { peng, userId, courses, nonTeachingTerm, hasRelief, reliefReason, hasTopic, topicDescription } }, { prisma }) => {
+      resolve: async (
+        _,
+        {
+          input: {
+            peng,
+            userId,
+            year,
+            CoursePreferenceInput,
+            hasRelief,
+            reliefReason,
+            hasTopic,
+            topicDescription,
+            maxFallCapacity,
+            maxSpringCapacity,
+            maxSummerCapacity,
+          },
+        },
+        { prisma }
+      ) => {
+        console.log(peng);
+        const courseObjs = await Promise.all(
+          CoursePreferenceInput.map(async ({ subject, code, term, preference }) => {
+            const courseData = await (prisma as PrismaClient).course.findFirst({
+              where: {
+                subject: subject ?? '',
+                code: code ?? '',
+                term: term ?? '',
+                year: year ?? '',
+              },
+            });
+
+            const courseID = courseData ? courseData.id : -1; //if courseData is null set id to -1
+
+            return {
+              courseID: courseID,
+              rank: preference ?? 0,
+            };
+          })
+        );
+
+        for (const courseObj of courseObjs) {
+          await (prisma as PrismaClient).preference.create({
+            data: {
+              userID: Number(userId),
+              courseID: courseObj.courseID,
+              rank: courseObj.rank,
+            },
+          });
+        }
+
+        await (prisma as PrismaClient).professorSettings.create({
+          data: {
+            userID: Number(userId),
+            year: year,
+            maxCoursesFall: maxFallCapacity,
+            maxCoursesSpring: maxSpringCapacity,
+            maxCoursesSummer: maxSummerCapacity,
+            hasRelief: hasRelief,
+            reliefReason: reliefReason ?? '',
+            hasTopic: hasTopic,
+            topicDescription: topicDescription ?? '',
+          },
+        });
         return { success: false, message: 'Not Implemented' };
       },
     });

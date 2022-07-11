@@ -111,6 +111,7 @@ input CreateTeachingPreferenceInput {
   reliefReason: String
   topicDescription: String
   userId: ID!
+  year: Int!
 }
 
 input CreateUserInput {
@@ -168,6 +169,9 @@ type MeetingTime {
 type Mutation {
   """Change the password of the currently logged in user"""
   changeUserPassword(input: ChangeUserPasswordInput!): Response!
+
+  """Teaching preferences"""
+  createTeachingPreference(input: CreateTeachingPreferenceInput!): Response!
 
   """Register a new user account"""
   createUser(input: CreateUserInput!): CreateUserMutationResult!
