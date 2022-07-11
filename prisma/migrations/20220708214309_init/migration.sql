@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Course" ALTER COLUMN "weeklyHours" DROP NOT NULL,
+ALTER COLUMN "peng" DROP NOT NULL;
