@@ -126,6 +126,7 @@ export const UserMutation = extendType({
             username,
             password: await generateHashPassword(password),
             role,
+            peng: true,
           },
         });
 
