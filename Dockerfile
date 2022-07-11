@@ -14,4 +14,3 @@ RUN npm i --save-dev @types/node-fetch
 EXPOSE 4000
 
 RUN npm run build
-ENTRYPOINT ["npm", "start"]
