@@ -48,6 +48,7 @@ model User {
   professorSettings ProfessorSettings[]
   courses Course[]
   active Boolean @default(value: true)
+  peng Boolean?
 }
 
 model Course {
@@ -57,13 +58,13 @@ model Course {
   term Term
   year Int
   weeklyHours Float
-  capacity Int?
+  capacity Int @default(value: 0)
   startDate DateTime?
   endDate DateTime?
   peng Peng
   meetingTimes MeetingTime[]
-  professor User @relation(fields: [professorId], references: [id])
-  professorId Int @default(value: 35)
+  professor User? @relation(fields: [professorId], references: [id])
+  professorId Int?
 }
 
 model MeetingTime {
@@ -99,4 +100,8 @@ model ProfessorSettings {
   maxCoursesFall Int
   maxCoursesSpring Int
   maxCoursesSummer Int
+  hasRelief Boolean
+  reliefReason String
+  hasTopic Boolean
+  topicDescription String
 }
