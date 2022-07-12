@@ -183,23 +183,35 @@ export const PreferenceMutation = extendType({
         { prisma }
       ) => {
         const courseObjs = await Promise.all(
-          CoursePreferenceInput.map(async ({ subject, code, term, preference }) => {
-            const courseData = await (prisma as PrismaClient).course.findFirst({
-              where: {
-                subject: subject ?? '',
-                code: code ?? '',
-                term: term ?? '',
-                year: year ?? '',
-              },
-            });
+          CoursePreferenceInput.map(
+            async ({
+              subject,
+              code,
+              term,
+              preference,
+            }: {
+              subject: string;
+              code: string;
+              term: Term;
+              preference: number;
+            }) => {
+              const courseData = await (prisma as PrismaClient).course.findFirst({
+                where: {
+                  subject: subject ?? '',
+                  code: code ?? '',
+                  term: term ?? '',
+                  year: year ?? '',
+                },
+              });
 
-            const courseID = courseData ? courseData.id : -1; //if courseData is null set id to -1
+              const courseID = courseData ? courseData.id : -1; //if courseData is null set id to -1
 
-            return {
-              courseID: courseID,
-              rank: preference ?? 0,
-            };
-          })
+              return {
+                courseID: courseID,
+                rank: preference ?? 0,
+              };
+            }
+          )
         );
 
         for (const courseObj of courseObjs) {
