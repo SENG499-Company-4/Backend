@@ -1,8 +1,8 @@
-import { PrismaClient, Term as TermType } from '@prisma/client';
 import { arg, extendType, inputObjectType, nonNull, objectType } from 'nexus';
+import { PrismaClient, Term } from '@prisma/client';
 import { getUserId } from '../../utils/auth';
 import { Response } from '../Response';
-import { Term } from '../Term';
+import { Term as TermType } from '../Term';
 import { CourseID } from './ID';
 
 export const CoursePreference = objectType({
@@ -28,7 +28,7 @@ export const CoursePreferenceInput = inputObjectType({
     t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
     t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
     t.nonNull.field('term', {
-      type: Term,
+      type: TermType,
       description: 'Term course is offered in',
     });
     t.nonNull.int('preference');
@@ -45,7 +45,7 @@ export const CreateTeachingPreferenceInput = inputObjectType({
       type: CoursePreferenceInput,
     });
     t.nonNull.field('nonTeachingTerm', {
-      type: Term,
+      type: TermType,
     });
     t.nonNull.boolean('hasRelief');
     t.string('reliefReason');
@@ -85,7 +85,7 @@ export const PreferenceQuery = extendType({
                 id: {
                   subject: '',
                   code: '',
-                  term: '' as TermType,
+                  term: '' as Term,
                   year: 0,
                 },
                 preference: 0,
@@ -130,7 +130,7 @@ export const AllPreferencesQuery = extendType({
               id: {
                 subject: 'FAKE',
                 code: '000',
-                term: 'FALL' as TermType,
+                term: 'FALL' as Term,
                 year: 0,
               },
               preference: 0,
