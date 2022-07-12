@@ -128,8 +128,8 @@ export const AllPreferencesQuery = extendType({
           if (!courseData) {
             return {
               id: {
-                subject: 'FAKE',
-                code: '000',
+                subject: '',
+                code: '',
                 term: 'FALL' as Term,
                 year: 0,
               },
