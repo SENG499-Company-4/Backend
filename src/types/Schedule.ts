@@ -77,7 +77,7 @@ export const ScheduleMutation = extendType({
         // Theoretically it should already exist as professors should submit preferences for it
         // Submitting preferences will instantiate it in the database
         const newCourses: Course[] = await Promise.all(
-          courses.map(async ({ subject, code, section }) => {
+          courses.map(async ({ subject, code, section }: { subject: string; code: string; section: number }) => {
             const newCourse = await (prisma as PrismaClient).course.upsert({
               create: {
                 subject,

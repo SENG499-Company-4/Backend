@@ -45,26 +45,7 @@ export const CourseQuery = extendType({
         const courses = await (prisma as PrismaClient).course.findMany({
           where: { term: term ?? undefined, year: year ?? undefined },
         });
-        // const meetingTimes = (
-        //   await (prisma as PrismaClient).meetingTime.findMany({
-        //     where: {
-        //       sectionCourseId: {
-        //         in: courses.map(({ id }) => id),
-        //       },
-        //     },
-        //   })
-        // ).map(({ sectionCourseId, day, startTime, endTime }) => ({
-        //   courseID: {
-        //     subject: courses.find(({ id }) => id === sectionCourseId)?.subject,
-        //     code: courses.find(({ id }) => id === sectionCourseId)?.code,
-        //     term: courses.find(({ id }) => id === sectionCourseId)?.term,
-        //     year: courses.find(({ id }) => id === sectionCourseId)?.year,
-        //   },
-        //   day: day ?? 'SUNDAY',
-        //   startTime,
-        //   endTime,
-        //   scheduleID: courses.find(({ id }) => id === sectionCourseId)?.scheduleID,
-        // }));
+
         // Fetch sections for the course
         const sections = await (prisma as PrismaClient).section.findMany({
           where: {
@@ -72,17 +53,16 @@ export const CourseQuery = extendType({
               in: courses.map(({ id }) => id),
             },
           },
+          include: {
+            professor: true,
+          },
         });
 
         const courseSections = await Promise.all(
           sections.map(async (section) => ({
             ...section,
             course: courses.find((course) => course.id === section.courseId),
-            professor: await (prisma as PrismaClient).user.findMany({
-              where: {
-                id: section.professorId ?? 0,
-              },
-            }),
+            professor: section.professor,
             meetingTimes: await (prisma as PrismaClient).meetingTime.findMany({
               where: {
                 sectionCourseId: section.courseId,
@@ -91,7 +71,7 @@ export const CourseQuery = extendType({
           }))
         );
 
-        return courseSections.map(({ course, professor, meetingTimes }) => ({
+        return courseSections.map(({ course, professor, meetingTimes, startDate, endDate }) => ({
           CourseID: {
             subject: course!.subject,
             code: course!.code,
@@ -101,8 +81,8 @@ export const CourseQuery = extendType({
           hoursPerWeek: course!.weeklyHours ?? 0,
           capacity: course!.capacity ?? 0,
           professors: professor,
-          startDate: course!.startDate ?? new Date(),
-          endDate: course!.endDate ?? new Date(),
+          startDate: startDate ?? new Date(),
+          endDate: endDate ?? new Date(),
           meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
             id: id,
             courseID: sectionCourseId,
