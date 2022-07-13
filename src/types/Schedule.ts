@@ -214,7 +214,7 @@ export const ScheduleMutation = extendType({
                 const preferences = await (prisma as PrismaClient).preference.findMany({
                   where: {
                     courseID: {
-                      in: dbCourses.map(({ id }) => id),
+                      in: dbCourses.map(({ id: courseId }) => courseId),
                     },
                     userID: id,
                   },
