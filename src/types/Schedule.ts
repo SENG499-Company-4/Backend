@@ -119,7 +119,7 @@ export const ScheduleMutation = extendType({
             const sections: { code: string }[] = [];
             for (let i = 0; i < section; i++) {
               sections.push({
-                code: i < 9 ? `AO${i + 1}` : `A${i + 1}`,
+                code: i < 9 ? `A0${i + 1}` : `A${i + 1}`,
               });
             }
             // Remove any existing meeting times
@@ -195,7 +195,7 @@ export const ScheduleMutation = extendType({
               streamSequence: '2A',
               courseTitle: 'Calculus',
               courseCapacity: capacity,
-              numSections: 1,
+              numSections: sections.length,
             });
           });
         });
@@ -209,7 +209,7 @@ export const ScheduleMutation = extendType({
         const users = await (prisma as PrismaClient).user.findMany();
         const professors = await Promise.all(
           users
-            .map(async ({ id, name }) => {
+            .map(async ({ id, username }) => {
               const preferences = await (prisma as PrismaClient).preference.findMany({
                 where: {
                   courseID: {
@@ -220,7 +220,7 @@ export const ScheduleMutation = extendType({
               });
 
               return {
-                displayName: name ?? 'Sima',
+                displayName: username ?? 'TBD',
                 preferences: preferences.map(({ rank, courseCode, courseSubject }) => ({
                   preferenceNum: rank ?? 0,
                   courseNum: `${courseSubject}${courseCode}`,
@@ -344,24 +344,8 @@ export const ScheduleMutation = extendType({
             });
           }
 
-          const c = await (prisma as PrismaClient).course.findUnique({
-            where: {
-              id: course.id,
-            },
-            include: {
-              sections: true,
-            },
-          });
-          // const s1 = await (prisma as PrismaClient).section.findMany({
-          //   where: {
-          //     code: 'A01',
-          //     courseId: course.id,
-          //   },
-          // });
-          console.log(c?.sections);
-
           // Update the section with the new meeting times and start/end date
-          const s = await (prisma as PrismaClient).section.update({
+          await (prisma as PrismaClient).section.update({
             where: {
               code_courseId: {
                 code,
@@ -373,7 +357,7 @@ export const ScheduleMutation = extendType({
               endDate: new Date(endDate),
               professor: {
                 connect: {
-                  name: prof?.displayName,
+                  username: prof?.displayName,
                 },
               },
               meetingTimes: {
@@ -381,7 +365,6 @@ export const ScheduleMutation = extendType({
               },
             },
           });
-          console.log(s);
         });
 
         return { success: true };
