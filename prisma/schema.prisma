@@ -105,7 +105,7 @@ model Preference {
 
 model ProfessorSettings {
   user User @relation(fields: [userID], references: [id])
-  userID Int @id
+  userID Int
   year Int
   maxCoursesFall Int
   maxCoursesSpring Int
@@ -114,4 +114,5 @@ model ProfessorSettings {
   reliefReason String
   hasTopic Boolean
   topicDescription String
+  @@id([userID, year])
 }

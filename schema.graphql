@@ -100,7 +100,7 @@ type CourseSection {
 }
 
 input CreateTeachingPreferenceInput {
-  CoursePreferenceInput: [CoursePreferenceInput!]!
+  courses: [CoursePreferenceInput!]!
   hasRelief: Boolean!
   hasTopic: Boolean!
   maxFallCapacity: Int!
@@ -197,7 +197,7 @@ type Query {
   allUsers: [User!]
 
   """Get all courses preferences"""
-  coursePreferences: CoursePreference!
+  coursePreferences: [CoursePreference!]
 
   """Get a list of courses for a given term and/or year"""
   courses(term: Term, year: Int): [CourseSection!]
