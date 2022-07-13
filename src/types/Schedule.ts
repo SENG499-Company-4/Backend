@@ -240,7 +240,7 @@ export const ScheduleMutation = extendType({
                   summerTermCourses: profSettings?.maxCoursesSummer ?? 0,
                 };
               })
-              .filter(async (professor) => await (await professor).preferences)
+              .filter(async (professor) => (await professor).preferences)
           );
 
           // Merge courses and preferences for algorithm 1 input
