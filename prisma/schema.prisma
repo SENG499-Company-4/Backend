@@ -49,6 +49,7 @@ model User {
   courses Section[]
   active Boolean @default(value: true)
   peng Boolean?
+  @@unique([name])
 }
 
 model Course {
@@ -61,8 +62,6 @@ model Course {
   peng Peng
   weeklyHours Float?
   capacity Int @default(value: 0)
-  startDate DateTime?
-  endDate DateTime?
   schedule Schedule? @relation(fields: [scheduleID], references: [id])
   scheduleID Int?
   preferences Preference[]
@@ -71,13 +70,15 @@ model Course {
 }
 
 model Section {
+  startDate DateTime?
+  endDate DateTime?
   meetingTimes MeetingTime[]
   code String
   course Course @relation(fields: [courseId], references: [id])
   courseId Int
   @@unique([code, courseId])
-  professor User? @relation(fields: [professorId], references: [id])
-  professorId Int?
+  professor User[]
+  id Int @id @default(autoincrement())
 }
 
 model MeetingTime {

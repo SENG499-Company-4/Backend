@@ -18,6 +18,9 @@ type Preference = {
   preferenceNum: number;
 };
 
+// MAX CAPACITIES PER TERM
+// from frontend -> backend for algo1
+
 type Professor = {
   preferences: Preference[];
   displayName: string;
@@ -41,10 +44,7 @@ export type Algo1Course = {
 export type Algorithm1Input = {
   hardScheduled: { fallCourses: Algo1Course[]; springCourses: Algo1Course[]; summerCourses: Algo1Course[] };
   coursesToSchedule: { fallCourses: Algo1Course[]; springCourses: Algo1Course[]; summerCourses: Algo1Course[] };
-  professors: {
-    displayName: string;
-    preferences: Preference[];
-  };
+  professors: Professor[];
 };
 
 export type Algorithm1Out = {

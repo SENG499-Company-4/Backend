@@ -8,7 +8,6 @@ export const usePost = async <T, R>(url: string, body: T): Promise<R> => {
     },
     body: JSON.stringify(body),
   });
-  console.log(res);
 
   if (!res.ok) throw new Error('fail');
 
