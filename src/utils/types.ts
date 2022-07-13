@@ -21,7 +21,7 @@ type Preference = {
 // MAX CAPACITIES PER TERM
 // from frontend -> backend for algo1
 
-type Professor = {
+export type Professor = {
   preferences: Preference[];
   displayName: string;
   fallTermCourses?: number;

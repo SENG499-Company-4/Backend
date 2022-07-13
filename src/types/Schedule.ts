@@ -2,7 +2,7 @@
 /* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import { Course, PrismaClient } from '@prisma/client';
-import { Algo1Course, Algorithm1Input, Algorithm1Out, Algorithm2 } from '../utils/types';
+import { Algo1Course, Algorithm1Input, Algorithm1Out, Algorithm2, Professor } from '../utils/types';
 import { usePost } from '../utils/api';
 import { prisma } from '../context';
 import { Company } from './Company';
@@ -208,7 +208,7 @@ export const ScheduleMutation = extendType({
 
           // Prepare professor preferences for algorithm 1
           const users = await (prisma as PrismaClient).user.findMany();
-          const professors = await Promise.all(
+          const professors: Professor[] = await Promise.all(
             users
               .map(async ({ id, username }) => {
                 const preferences = await (prisma as PrismaClient).preference.findMany({
@@ -220,12 +220,24 @@ export const ScheduleMutation = extendType({
                   },
                 });
 
+                const profSettings = await (prisma as PrismaClient).professorSettings.findUnique({
+                  where: {
+                    year_userID: {
+                      year,
+                      userID: id,
+                    },
+                  },
+                });
+
                 return {
                   displayName: username ?? 'TBD',
                   preferences: preferences.map(({ rank, courseCode, courseSubject }) => ({
                     preferenceNum: rank ?? 0,
                     courseNum: `${courseSubject}${courseCode}`,
                   })),
+                  fallTermCourses: profSettings?.maxCoursesFall ?? 0,
+                  springTermCourses: profSettings?.maxCoursesSpring ?? 0,
+                  summerTermCourses: profSettings?.maxCoursesSummer ?? 0,
                 };
               })
               .filter(async (professor) => await (await professor).preferences)
@@ -368,7 +380,6 @@ export const ScheduleMutation = extendType({
             });
           });
         } catch (e) {
-          console.log(e);
           return { success: false, message: (e as Error).message };
         }
 
