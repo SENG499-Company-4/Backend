@@ -81,8 +81,8 @@ export const CourseQuery = extendType({
           hoursPerWeek: course!.weeklyHours ?? 0,
           capacity: course!.capacity ?? 0,
           professors: professor,
-          startDate: startDate ?? new Date(),
-          endDate: endDate ?? new Date(),
+          startDate: startDate,
+          endDate: endDate,
           meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
             id: id,
             courseID: sectionCourseId,

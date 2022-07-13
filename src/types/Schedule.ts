@@ -50,11 +50,10 @@ export const ScheduleMutation = extendType({
         input: arg({ type: nonNull(GenerateScheduleInput) }),
       },
       resolve: async (_, { input: { algorithm1, algorithm2, courses, term, year } }) => {
-        if (!courses || courses.length === 0) {
+        if (!courses) {
           return { success: false, message: 'Courses must be passed in to generate a schedule.' };
         }
 
-        // Determine which company to use for each algorithm
         const algo1url =
           algorithm1 === 'COMPANY4'
             ? 'https://seng499company4algorithm1.herokuapp.com/schedule'
@@ -419,7 +418,6 @@ export const ScheduleQuery = extendType({
             scheduleID: schedule.id,
           },
         });
-
         // Fetch sections for the course
         const sections = await (prisma as PrismaClient).section.findMany({
           where: {
@@ -460,8 +458,8 @@ export const ScheduleQuery = extendType({
             hoursPerWeek: course!.weeklyHours ?? 0,
             capacity: course!.capacity ?? 0,
             professors: professor,
-            startDate: startDate ?? new Date(),
-            endDate: endDate ?? new Date(),
+            startDate: startDate,
+            endDate: endDate,
             meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
               id: id,
               courseID: sectionCourseId,
