@@ -1,5 +1,5 @@
 import { arg, extendType, inputObjectType, nonNull, objectType } from 'nexus';
-import { PrismaClient, Term } from '@prisma/client';
+import { Preference, PrismaClient, Term } from '@prisma/client';
 import { getUserId } from '../../utils/auth';
 import { Response } from '../Response';
 import { Term as TermType } from '../Term';
@@ -181,7 +181,7 @@ export const PreferenceMutation = extendType({
         },
         { prisma }
       ) => {
-        const courseObjs = await Promise.all(
+        const preferenceObjs = await Promise.all(
           courses.map(
             async ({
               subject,
@@ -213,25 +213,33 @@ export const PreferenceMutation = extendType({
           )
         );
 
-        for (const courseObj of courseObjs) {
+        for (const preferenceObj of preferenceObjs) {
           await (prisma as PrismaClient).preference.upsert({
             where: {
               // eslint-disable-next-line camelcase
               userID_courseID: {
                 userID: Number(userId),
-                courseID: courseObj.courseID,
+                courseID: preferenceObj.courseID,
               },
             },
             update: {
-              rank: courseObj.rank,
+              rank: preferenceObj.rank,
             },
             create: {
               userID: Number(userId),
-              courseID: courseObj.courseID,
-              rank: courseObj.rank,
+              courseID: preferenceObj.courseID,
+              rank: preferenceObj.rank,
             },
           });
         }
+
+        const prefs = await (prisma as PrismaClient).preference.findMany({
+          where: {
+            user: {
+              id: Number(userId),
+            },
+          },
+        });
 
         await (prisma as PrismaClient).user.update({
           where: {
@@ -239,6 +247,9 @@ export const PreferenceMutation = extendType({
           },
           data: {
             peng: peng,
+            preferences: {
+              set: prefs,
+            },
           },
         });
 
