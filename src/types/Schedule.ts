@@ -135,7 +135,7 @@ export const ScheduleMutation = extendType({
               },
             });
             // Connect the new sections to the course
-            return await (prisma as PrismaClient).course.update({
+            return (prisma as PrismaClient).course.update({
               where: {
                 id: newCourse.id,
               },
@@ -166,7 +166,7 @@ export const ScheduleMutation = extendType({
           // Update capacities in the database from algorithm 2's response
           const dbCourses = await Promise.all(
             courseCapacities.map(async ({ code, subject, semester, capacity }) => {
-              return await (prisma as PrismaClient).course.update({
+              return (prisma as PrismaClient).course.update({
                 data: {
                   capacity,
                 },
