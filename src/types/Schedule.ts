@@ -166,8 +166,11 @@ export const ScheduleMutation = extendType({
             algo1Courses.push({
               courseNumber: code,
               subject,
+              // sequenceMatter does not matter because algo 1 uses numSections instead
               sequenceNumber: 'A01',
+              // streamSequence also does not matter as far as I know
               streamSequence: '2A',
+              // TODO: Seed the DB with course titles? Not sure bout this one.
               courseTitle: 'Calculus',
               courseCapacity: capacity,
               numSections,
