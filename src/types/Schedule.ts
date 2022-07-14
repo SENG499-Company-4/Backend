@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
 import { Course, MeetingTime, PrismaClient, Section, User } from '@prisma/client';
@@ -245,27 +244,10 @@ export const ScheduleMutation = extendType({
 
           // Create new meeting times in the database based on response from algorithm 1
           thisTermsCourses.forEach(async ({ sequenceNumber: code, courseNumber, subject, assignment, prof }) => {
-            // Get the database object for the relevant course
-            // const course = await (prisma as PrismaClient).course.findFirst({
-            //   where: {
-            //     subject,
-            //     code: courseNumber,
-            //     year,
-            //     term,
-            //     scheduleID: schedule.id,
-            //   },
-            // });
+            // Match our new courses to the courses returned from algorithm 1
             const course = newCourses.find((course) => course.code === courseNumber && course.subject === subject);
-            if (!course) return;
+            if (!course || !assignment) return;
 
-            // Delete any existing meeting times
-            // (prisma as PrismaClient).meetingTime.deleteMany({
-            //   where: {
-            //     sectionCourseId: course.id,
-            //   },
-            // });
-
-            if (!assignment) return;
             const {
               sunday,
               monday,
@@ -352,8 +334,8 @@ export const ScheduleMutation = extendType({
               create: {
                 code,
                 courseId: course.id,
-                startDate: new Date(startDate),
-                endDate: new Date(endDate),
+                startDate: new Date(startDate) ?? new Date(),
+                endDate: new Date(endDate) ?? new Date(),
                 professor: {
                   connect: {
                     username: prof?.displayName,
@@ -364,8 +346,8 @@ export const ScheduleMutation = extendType({
                 },
               },
               update: {
-                startDate: new Date(startDate),
-                endDate: new Date(endDate),
+                startDate: new Date(startDate) ?? new Date(),
+                endDate: new Date(endDate) ?? new Date(),
                 professor: {
                   connect: {
                     username: prof?.displayName,
@@ -447,13 +429,13 @@ export const ScheduleQuery = extendType({
           createdAt: schedule.createdAt,
           courses: courseSections.map(({ course, professor, meetingTimes, startDate, endDate, code }) => ({
             CourseID: {
-              subject: course!.subject,
-              code: course!.code,
-              term: course!.term,
+              subject: course.subject,
+              code: course.code,
+              term: course.term,
               year: year ?? 0,
             },
-            hoursPerWeek: course!.weeklyHours ?? 0,
-            capacity: course!.capacity ?? 0,
+            hoursPerWeek: course.weeklyHours ?? 0,
+            capacity: course.capacity ?? 0,
             professors: professor,
             startDate: startDate,
             endDate: endDate,

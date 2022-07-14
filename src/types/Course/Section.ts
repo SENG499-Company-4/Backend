@@ -35,7 +35,6 @@ export const CourseQuery = extendType({
   type: 'Query',
   definition(t) {
     t.list.nonNull.field('courses', {
-      // type is a list of coursesections
       type: CourseSection,
       description: 'Get a list of courses for a given term and/or year',
       args: {
