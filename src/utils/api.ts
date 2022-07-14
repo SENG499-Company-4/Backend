@@ -5,12 +5,11 @@ export const usePost = async <T, R>(url: string, body: T): Promise<R> => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      accept: 'application/json',
     },
     body: JSON.stringify(body),
   });
 
-  if (!res.ok) throw new Error('fail');
+  if (res.status === 400) throw new Error((await res.json()).detail ?? 'Unable to generate schedule');
 
   return res.json();
 };
