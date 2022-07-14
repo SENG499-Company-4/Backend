@@ -83,6 +83,9 @@ type CourseSection {
   """Professor's info, if any professors are assigned"""
   professors: [User!]
 
+  """Section number for courses, eg: A01, A02"""
+  sectionNumber: String
+
   """The start date of the course"""
   startDate: Date!
 }

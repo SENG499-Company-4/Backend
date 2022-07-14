@@ -27,6 +27,7 @@ export const CourseSection = objectType({
       type: MeetingTime,
       description: 'Days of the week the class is offered in - see Day',
     });
+    t.string('sectionNumber', { description: 'Section number for courses, eg: A01, A02' });
   },
 });
 
