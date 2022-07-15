@@ -53,41 +53,60 @@ export const Schedule = objectType({
           },
         });
 
-        const courseSections: (Section & { course: Course; professor: User[]; meetingTimes: MeetingTime[] })[] = [];
+        const courseSections: (Section & {
+          course: Course;
+          professor: User[];
+          meetingTimes: MeetingTime[];
+          hoursPerWeek: number;
+          title: string;
+        })[] = [];
         courses.forEach((course) => {
-          course.sections.forEach((section) => {
+          course.sections.forEach(async (section) => {
+            const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
+              where: {
+                subject_code: {
+                  code: course.code,
+                  subject: course.subject,
+                },
+              },
+            });
             const courseSection = {
               ...section,
               course,
               professor: section.professor,
               meetingTimes: section.meetingTimes,
+              hoursPerWeek: courseInfo?.weeklyHours ?? 0,
+              title: courseInfo?.title ?? '',
             };
 
             courseSections.push(courseSection);
           });
         });
-        return courseSections.map(({ course, professor, meetingTimes, startDate, endDate, code }) => ({
-          CourseID: {
-            subject: course.subject,
-            code: course.code,
-            term: course.term,
-            year: year ?? 0,
-          },
-          hoursPerWeek: course.weeklyHours ?? 0,
-          capacity: course.capacity ?? 0,
-          professors: professor,
-          startDate: startDate,
-          endDate: endDate,
-          sectionNumber: code,
-          meetingTimes: meetingTimes.map(({ id: meetingTimeId, sectionCourseId, day, startTime, endTime }) => ({
-            id: meetingTimeId,
-            courseID: sectionCourseId,
-            day: day ?? 'SUNDAY',
-            startTime: startTime,
-            endTime: endTime,
-            scheduleID: id,
-          })),
-        }));
+        return courseSections.map(
+          ({ course, professor, meetingTimes, startDate, endDate, code, hoursPerWeek, title }) => ({
+            CourseID: {
+              subject: course.subject,
+              code: course.code,
+              term: course.term,
+              year: year ?? 0,
+              title,
+            },
+            hoursPerWeek,
+            capacity: course.capacity ?? 0,
+            professors: professor,
+            startDate: startDate,
+            endDate: endDate,
+            sectionNumber: code,
+            meetingTimes: meetingTimes.map(({ id: meetingTimeId, sectionCourseId, day, startTime, endTime }) => ({
+              id: meetingTimeId,
+              courseID: sectionCourseId,
+              day: day ?? 'SUNDAY',
+              startTime: startTime,
+              endTime: endTime,
+              scheduleID: id,
+            })),
+          })
+        );
       },
     });
   },
