@@ -199,6 +199,7 @@ export const UserMutation = extendType({
     t.nonNull.field('changeUserPassword', {
       type: Response,
       description: 'Change the password of the currently logged in user',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, args.input.id),
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
@@ -227,6 +228,7 @@ export const UserMutation = extendType({
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
       description: 'Reset a users password.',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.id)),
       args: {
         id: nonNull(idArg()),
       },
