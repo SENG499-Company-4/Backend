@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, intArg, nonNull, objectType } from 'nexus';
-import { Course, PrismaClient } from '@prisma/client';
-import { Algo1Course, Algorithm1, Algorithm2 } from '../utils/types';
+import { Course, MeetingTime, PrismaClient, Section, User } from '@prisma/client';
+import { Algo1Course, Algorithm1Input, Algorithm1Out, Algorithm2, Professor } from '../utils/types';
 import { usePost } from '../utils/api';
 import { prisma } from '../context';
 import { Company } from './Company';
@@ -51,7 +50,7 @@ export const ScheduleMutation = extendType({
       },
       resolve: async (_, { input: { algorithm1, algorithm2, courses, term, year } }) => {
         if (!courses) {
-          return { success: false, message: 'No courses array passed' };
+          return { success: false, message: 'Courses must be passed in to generate a schedule.' };
         }
 
         const algo1url =
@@ -64,10 +63,20 @@ export const ScheduleMutation = extendType({
             ? 'https://algorithm-2.herokuapp.com/predict_class_size'
             : 'https://seng499company4algorithm2.herokuapp.com/predict_class_size';
 
-        // Create or update the provided courses in the DB
-        const newCourses: Course[] = await Promise.all(
-          courses.map(async ({ subject, code }: { subject: string; code: string }) => {
-            return await (prisma as PrismaClient).course.upsert({
+        // Create the new schedule in the database
+        const schedule = await (prisma as PrismaClient).schedule.create({
+          data: {
+            createdAt: new Date(),
+            year,
+          },
+        });
+
+        // Create or update the provided courses in the DB and connect them to the new schedule
+        // Theoretically it should already exist as professors should submit preferences for it
+        // Submitting preferences will instantiate it in the database
+        const newCourses: (Course & { sectionCount: number })[] = await Promise.all(
+          courses.map(async ({ subject, code, section }: { subject: string; code: string; section: number }) => {
+            const newCourse = await (prisma as PrismaClient).course.upsert({
               create: {
                 subject,
                 code,
@@ -75,6 +84,12 @@ export const ScheduleMutation = extendType({
                 year,
                 peng: 'NOTREQUIRED',
                 capacity: 0,
+                schedule: {
+                  connect: {
+                    id: schedule.id,
+                  },
+                },
+                sections: {},
               },
               update: {
                 subject,
@@ -82,6 +97,11 @@ export const ScheduleMutation = extendType({
                 term,
                 year,
                 capacity: 0,
+                schedule: {
+                  connect: {
+                    id: schedule.id,
+                  },
+                },
               },
               where: {
                 subject_code_year_term: {
@@ -91,38 +111,34 @@ export const ScheduleMutation = extendType({
                   subject,
                 },
               },
+              include: {
+                sections: {
+                  include: {
+                    meetingTimes: true,
+                  },
+                },
+              },
             });
+
+            // Remove any existing meeting times
+            await (prisma as PrismaClient).meetingTime.deleteMany({
+              where: {
+                sectionCourseId: newCourse.id,
+              },
+            });
+            // Remove any existing sections
+            await (prisma as PrismaClient).section.deleteMany({
+              where: {
+                courseId: newCourse.id,
+              },
+            });
+
+            return { ...newCourse, sectionCount: section };
           })
         );
 
-        const c = await (prisma as PrismaClient).course.findMany({
-          where: {
-            year,
-            term,
-          },
-        });
-        // delete courses that aren't provided
-        c.forEach(async (course) => {
-          if (!newCourses.find((newCourse) => newCourse.id === course.id)) {
-            await (prisma as PrismaClient).meetingTime.deleteMany({
-              where: {
-                sectionCourseId: course.id,
-              },
-            });
-            await (prisma as PrismaClient).section.deleteMany({
-              where: {
-                courseId: course.id,
-              },
-            });
-            await (prisma as PrismaClient).course.delete({
-              where: {
-                id: course.id,
-              },
-            });
-          }
-        });
-
-        const courseInput: Algorithm2[] = newCourses.map(({ code, subject, capacity }) => {
+        // Construct the expected input for algorithm 2
+        const algorithm2Input: Algorithm2[] = newCourses.map(({ code, subject, capacity }) => {
           return {
             code,
             subject,
@@ -132,188 +148,222 @@ export const ScheduleMutation = extendType({
           };
         });
 
-        const courseCapacities = await usePost<Algorithm2[], Algorithm2[]>(algo2Url, courseInput);
+        try {
+          // Call algorithm 2
+          const courseCapacities = await usePost<Algorithm2[], Algorithm2[]>(algo2Url, algorithm2Input);
 
-        const sections = [
-          {
-            code: 'A01',
-            professorId: 1,
-          },
-          {
-            code: 'A01',
-            professorId: 2,
-          },
-          {
-            code: 'A01',
-            professorId: 3,
-          },
-        ];
-
-        const meetingTimes = [
-          [
-            {
-              day: 'TUESDAY',
-              startTime: new Date('2021-01-20T12:00:00.000Z'),
-              endTime: new Date('2021-01-20T12:50:00.000Z'),
-            },
-            {
-              day: 'WEDNESDAY',
-              startTime: new Date('2021-01-20T12:00:00.000Z'),
-              endTime: new Date('2021-01-20T12:50:00.000Z'),
-            },
-            {
-              day: 'FRIDAY',
-              startTime: new Date('2021-01-20T12:00:00.000Z'),
-              endTime: new Date('2021-01-20T12:50:00.000Z'),
-            },
-          ],
-          [
-            {
-              day: 'TUESDAY',
-              startTime: new Date('2021-01-20T13:00:00.000Z'),
-              endTime: new Date('2021-01-20T13:50:00.000Z'),
-            },
-            {
-              day: 'WEDNESDAY',
-              startTime: new Date('2021-01-20T13:00:00.000Z'),
-              endTime: new Date('2021-01-20T13:50:00.000Z'),
-            },
-            {
-              day: 'FRIDAY',
-              startTime: new Date('2021-01-20T13:00:00.000Z'),
-              endTime: new Date('2021-01-20T13:50:00.000Z'),
-            },
-          ],
-          [
-            {
-              day: 'MONDAY',
-              startTime: new Date('2021-01-20T13:00:00.000Z'),
-              endTime: new Date('2021-01-20T13:50:00.000Z'),
-            },
-            {
-              day: 'THURSDAY',
-              startTime: new Date('2021-01-20T13:00:00.000Z'),
-              endTime: new Date('2021-01-20T13:50:00.000Z'),
-            },
-          ],
-        ];
-
-        const s = await (prisma as PrismaClient).schedule.create({
-          data: {
-            createdAt: new Date(),
-            year,
-          },
-        });
-
-        newCourses.forEach(async ({ subject, code, year, term, id }, i) => {
-          await (prisma as PrismaClient).course.update({
-            where: {
-              subject_code_year_term: {
-                subject,
-                code,
-                year,
-                term,
-              },
-            },
-            data: {
-              sections: {
-                connectOrCreate: {
-                  where: {
-                    code_courseId: {
-                      code: sections[i].code,
-                      courseId: id,
-                    },
-                  },
-                  create: {
-                    meetingTimes: {
-                      create: meetingTimes[i],
-                    },
-                    code: sections[i].code,
-                    professorId: sections[i].professorId,
-                  },
-                },
-              },
-              schedule: {
-                connect: {
-                  id: s.id,
-                },
-              },
-            },
+          // Update capacities for the new courses from algorithm 2's response
+          courseCapacities.forEach(({ code, subject, semester, capacity }) => {
+            const courseIndex = newCourses.findIndex(
+              (course) => code === course.code && subject === course.subject && semester === course.term
+            );
+            newCourses[courseIndex].capacity = capacity;
           });
-        });
 
-        // Update capacities in the database
-        courseCapacities.forEach(async ({ code, subject, semester, capacity }) => {
-          await (prisma as PrismaClient).course.update({
-            data: {
-              capacity,
-            },
-            where: {
-              subject_code_year_term: {
-                code,
-                term: semester,
-                year,
-                subject,
-              },
-            },
-          });
-        });
-
-        return { success: true, message: JSON.stringify(courseCapacities) };
-
-        const dbCourses = await (prisma as PrismaClient).course.findMany({
-          where: {
-            term,
-            year,
-          },
-        });
-
-        const courseSections: Algo1Course[] = await Promise.all(
-          dbCourses.map(async ({ code, subject, capacity, startDate, endDate }) => {
-            return {
+          // Create course input for algorithm 1
+          const algo1Courses: Algo1Course[] = [];
+          newCourses.forEach(({ code, subject, capacity, sectionCount: numSections }) => {
+            algo1Courses.push({
               courseNumber: code,
               subject,
-              sequenceNumber: '1',
-              streamSequence: '1',
+              // sequenceMatter does not matter because algo 1 uses numSections instead
+              sequenceNumber: 'A01',
+              // streamSequence also does not matter as far as I know
+              streamSequence: '2A',
+              // TODO: Seed the DB with course titles? Not sure bout this one.
               courseTitle: 'Calculus',
               courseCapacity: capacity,
-              numSections: 1,
-              assignment: {
-                startDate: String(startDate),
-                endDate: String(endDate),
+              numSections,
+            });
+          });
+
+          // Assign input to correct term array
+          const fallCourses: Algo1Course[] = term === 'FALL' ? algo1Courses : [];
+          const summerCourses: Algo1Course[] = term === 'SUMMER' ? algo1Courses : [];
+          const springCourses: Algo1Course[] = term === 'SPRING' ? algo1Courses : [];
+
+          // Prepare professor preferences for algorithm 1
+          const users = await (prisma as PrismaClient).user.findMany();
+          const professors: Professor[] = await Promise.all(
+            users
+              .map(async ({ id, username }) => {
+                const preferences = await (prisma as PrismaClient).preference.findMany({
+                  where: {
+                    courseID: {
+                      in: newCourses.map(({ id: courseId }) => courseId),
+                    },
+                    userID: id,
+                  },
+                });
+
+                const profSettings = await (prisma as PrismaClient).professorSettings.findUnique({
+                  where: {
+                    year_userID: {
+                      year,
+                      userID: id,
+                    },
+                  },
+                });
+
+                return {
+                  displayName: username ?? 'TBD',
+                  preferences: preferences.map(({ rank, courseCode, courseSubject }) => ({
+                    preferenceNum: rank ?? 0,
+                    courseNum: `${courseSubject}${courseCode}`,
+                  })),
+                  fallTermCourses: profSettings?.maxCoursesFall ?? 0,
+                  springTermCourses: profSettings?.maxCoursesSpring ?? 0,
+                  summerTermCourses: profSettings?.maxCoursesSummer ?? 0,
+                };
+              })
+              .filter(async (professor) => (await professor).preferences)
+          );
+
+          // Merge courses and preferences for algorithm 1 input
+          const algo1Input: Algorithm1Input = {
+            hardScheduled: {
+              fallCourses: [],
+              summerCourses: [],
+              springCourses: [],
+            },
+            coursesToSchedule: {
+              fallCourses,
+              summerCourses,
+              springCourses,
+            },
+            professors,
+          };
+
+          // Call algorithm 1
+          const generatedSchedule = await usePost<Algorithm1Input, Algorithm1Out>(algo1url, algo1Input);
+
+          if (!generatedSchedule.fallCourses && !generatedSchedule.springCourses && !generatedSchedule.summerCourses) {
+            return { success: false, message: 'No schedule was generated' };
+          }
+
+          let thisTermsCourses = generatedSchedule.fallCourses;
+          if (term === 'SPRING') thisTermsCourses = generatedSchedule.springCourses;
+          if (term === 'SUMMER') thisTermsCourses = generatedSchedule.summerCourses;
+
+          // Create new meeting times in the database based on response from algorithm 1
+          thisTermsCourses.forEach(async ({ sequenceNumber: code, courseNumber, subject, assignment, prof }) => {
+            // Match our new courses to the courses returned from algorithm 1
+            const course = newCourses.find((course) => course.code === courseNumber && course.subject === subject);
+            if (!course || !assignment) return;
+
+            const {
+              sunday,
+              monday,
+              tuesday,
+              wednesday,
+              thursday,
+              friday,
+              saturday,
+              beginTime,
+              endTime,
+              startDate,
+              endDate,
+            } = assignment;
+
+            const meetingTimes = [];
+            if (sunday) {
+              meetingTimes.push({
+                day: 'SUNDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (monday) {
+              meetingTimes.push({
+                day: 'MONDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (tuesday) {
+              meetingTimes.push({
+                day: 'TUESDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (wednesday) {
+              meetingTimes.push({
+                day: 'WEDNESDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (thursday) {
+              meetingTimes.push({
+                day: 'THURSDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (friday) {
+              meetingTimes.push({
+                day: 'FRIDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+            if (saturday) {
+              meetingTimes.push({
+                day: 'SATURDAY',
+                startTime: beginTime ? new Date(beginTime) : undefined,
+                endTime: endTime ? new Date(endTime) : undefined,
+              });
+            }
+
+            // Update the database with the new capacity
+            await (prisma as PrismaClient).course.update({
+              where: {
+                id: course.id,
               },
-            };
-          })
-        );
+              data: {
+                capacity: course.capacity,
+              },
+            });
 
-        const fallCourses: Algo1Course[] = term === 'FALL' ? courseSections : [];
-        const summerCourses: Algo1Course[] = term === 'SUMMER' ? courseSections : [];
-        const springCourses: Algo1Course[] = term === 'SPRING' ? courseSections : [];
-
-        const generatedSchedule = await usePost<Algorithm1, Algorithm1>(algo1url, {
-          fallCourses,
-          summerCourses,
-          springCourses,
-        });
-
-        if (!generatedSchedule.fallCourses && !generatedSchedule.springCourses && !generatedSchedule.summerCourses) {
-          return { success: false, message: 'No schedule was generated' };
-        }
-
-        if (term === 'FALL') {
-          generatedSchedule.fallCourses.forEach(() => {
-            console.log('fall');
+            // Update the section with the new meeting times and start/end date
+            await (prisma as PrismaClient).section.upsert({
+              where: {
+                code_courseId: {
+                  code,
+                  courseId: course.id,
+                },
+              },
+              create: {
+                code,
+                courseId: course.id,
+                startDate: new Date(startDate) ?? new Date(),
+                endDate: new Date(endDate) ?? new Date(),
+                professor: {
+                  connect: {
+                    username: prof?.displayName,
+                  },
+                },
+                meetingTimes: {
+                  create: meetingTimes,
+                },
+              },
+              update: {
+                startDate: new Date(startDate) ?? new Date(),
+                endDate: new Date(endDate) ?? new Date(),
+                professor: {
+                  connect: {
+                    username: prof?.displayName,
+                  },
+                },
+                meetingTimes: {
+                  create: meetingTimes,
+                },
+              },
+            });
           });
-        }
-        if (term === 'SPRING') {
-          generatedSchedule.springCourses.forEach(() => {
-            console.log('spring');
-          });
-        }
-        if (term === 'SUMMER') {
-          generatedSchedule.summerCourses.forEach(() => {
-            console.log('summer');
-          });
+        } catch (e) {
+          return { success: false, message: (e as Error).message };
         }
 
         return { success: true };
@@ -351,53 +401,48 @@ export const ScheduleQuery = extendType({
           where: {
             scheduleID: schedule.id,
           },
-        });
-
-        // Fetch sections for the course
-        const sections = await (prisma as PrismaClient).section.findMany({
-          where: {
-            courseId: {
-              in: courses.map(({ id }) => id),
+          include: {
+            sections: {
+              include: {
+                meetingTimes: true,
+                professor: true,
+              },
             },
           },
         });
 
-        console.log(courses);
+        const courseSections: (Section & { course: Course; professor: User[]; meetingTimes: MeetingTime[] })[] = [];
+        courses.forEach((course) => {
+          course.sections.forEach((section) => {
+            const courseSection = {
+              ...section,
+              course,
+              professor: section.professor,
+              meetingTimes: section.meetingTimes,
+            };
 
-        const courseSections = await Promise.all(
-          sections.map(async (section) => ({
-            ...section,
-            course: courses.find((course) => course.id === section.courseId),
-            professor: await (prisma as PrismaClient).user.findMany({
-              where: {
-                id: section.professorId ?? 0,
-              },
-            }),
-            meetingTimes: await (prisma as PrismaClient).meetingTime.findMany({
-              where: {
-                sectionCourseId: section.courseId,
-              },
-            }),
-          }))
-        );
+            courseSections.push(courseSection);
+          });
+        });
 
         // Return schedule object
         return {
           id: String(schedule.id),
           year: schedule.year ?? 0,
           createdAt: schedule.createdAt,
-          courses: courseSections.map(({ course, professor, meetingTimes }) => ({
+          courses: courseSections.map(({ course, professor, meetingTimes, startDate, endDate, code }) => ({
             CourseID: {
-              subject: course!.subject,
-              code: course!.code,
-              term: course!.term,
+              subject: course.subject,
+              code: course.code,
+              term: course.term,
               year: year ?? 0,
             },
-            hoursPerWeek: course!.weeklyHours ?? 0,
-            capacity: course!.capacity ?? 0,
+            hoursPerWeek: course.weeklyHours ?? 0,
+            capacity: course.capacity ?? 0,
             professors: professor,
-            startDate: course!.startDate ?? new Date(),
-            endDate: course!.endDate ?? new Date(),
+            startDate: startDate,
+            endDate: endDate,
+            sectionNumber: code,
             meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
               id: id,
               courseID: sectionCourseId,
