@@ -37,7 +37,7 @@ export const Schedule = objectType({
       args: {
         term: arg({ type: nonNull(Term) }),
       },
-      resolve: async ({ year, id }, { term }, { prisma }) => {
+      resolve: async ({ year, id }, { term }) => {
         const courses = await (prisma as PrismaClient).course.findMany({
           where: {
             scheduleID: Number(id),
@@ -79,8 +79,8 @@ export const Schedule = objectType({
           startDate: startDate,
           endDate: endDate,
           sectionNumber: code,
-          meetingTimes: meetingTimes.map(({ id, sectionCourseId, day, startTime, endTime }) => ({
-            id: id,
+          meetingTimes: meetingTimes.map(({ id: meetingTimeId, sectionCourseId, day, startTime, endTime }) => ({
+            id: meetingTimeId,
             courseID: sectionCourseId,
             day: day ?? 'SUNDAY',
             startTime: startTime,
@@ -157,9 +157,9 @@ export const ScheduleMutation = extendType({
           });
 
           // Assign input to correct term array
-          const fallCourses: Algo1Course[] = createAlgo1Input(newFallCourses);
-          const summerCourses: Algo1Course[] = createAlgo1Input(newSummerCourses);
-          const springCourses: Algo1Course[] = createAlgo1Input(newSpringCourses);
+          const algo1FallCourses: Algo1Course[] = createAlgo1Input(newFallCourses);
+          const algo1SummerCourses: Algo1Course[] = createAlgo1Input(newSummerCourses);
+          const algo1SpringCourses: Algo1Course[] = createAlgo1Input(newSpringCourses);
 
           // Prepare professor preferences for algorithm 1
           const users = await (prisma as PrismaClient).user.findMany();
@@ -206,9 +206,9 @@ export const ScheduleMutation = extendType({
               springCourses: [],
             },
             coursesToSchedule: {
-              fallCourses,
-              summerCourses,
-              springCourses,
+              fallCourses: algo1FallCourses,
+              summerCourses: algo1SummerCourses,
+              springCourses: algo1SpringCourses,
             },
             professors,
           };
@@ -244,15 +244,12 @@ export const ScheduleQuery = extendType({
       args: {
         year: intArg(),
       },
-      resolve: async (__, args, { prisma }) => {
+      resolve: async (__, { year }) => {
         const schedule = await (prisma as PrismaClient).schedule.findFirst({
           orderBy: { createdAt: 'desc' },
           where: {
             year:
-              args.year ||
-              (
-                await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } })
-              )[0].year,
+              year || (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
           },
         });
 
@@ -260,35 +257,6 @@ export const ScheduleQuery = extendType({
         if (!schedule) {
           return null;
         }
-
-        // Fetch courses from the latest schedule
-        const courses = await (prisma as PrismaClient).course.findMany({
-          where: {
-            scheduleID: schedule.id,
-          },
-          include: {
-            sections: {
-              include: {
-                meetingTimes: true,
-                professor: true,
-              },
-            },
-          },
-        });
-
-        const courseSections: (Section & { course: Course; professor: User[]; meetingTimes: MeetingTime[] })[] = [];
-        courses.forEach((course) => {
-          course.sections.forEach((section) => {
-            const courseSection = {
-              ...section,
-              course,
-              professor: section.professor,
-              meetingTimes: section.meetingTimes,
-            };
-
-            courseSections.push(courseSection);
-          });
-        });
 
         // Return schedule object
         return {
