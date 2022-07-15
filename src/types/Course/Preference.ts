@@ -1,5 +1,6 @@
+/* eslint-disable camelcase */
 import { arg, extendType, inputObjectType, nonNull, objectType } from 'nexus';
-import { Preference, PrismaClient, Term } from '@prisma/client';
+import { PrismaClient, Term } from '@prisma/client';
 import { getUserId } from '../../utils/auth';
 import { Response } from '../Response';
 import { Term as TermType } from '../Term';
@@ -216,7 +217,6 @@ export const PreferenceMutation = extendType({
         for (const preferenceObj of preferenceObjs) {
           await (prisma as PrismaClient).preference.upsert({
             where: {
-              // eslint-disable-next-line camelcase
               userID_courseID: {
                 userID: Number(userId),
                 courseID: preferenceObj.courseID,
@@ -226,8 +226,8 @@ export const PreferenceMutation = extendType({
               rank: preferenceObj.rank,
             },
             create: {
-              userID: Number(userId),
-              courseID: preferenceObj.courseID,
+              user: { connect: { id: Number(userId) } },
+              course: { connect: { id: preferenceObj.courseID } },
               rank: preferenceObj.rank,
             },
           });
@@ -248,17 +248,16 @@ export const PreferenceMutation = extendType({
           data: {
             peng: peng,
             preferences: {
-              set: prefs,
+              set: prefs.map(({ userID, courseID }) => ({ userID_courseID: { userID, courseID } })),
             },
           },
         });
 
         await (prisma as PrismaClient).professorSettings.upsert({
           where: {
-            // eslint-disable-next-line camelcase
-            userID_year: {
+            year_userID: {
               userID: Number(userId),
-              year: Number(year),
+              year,
             },
           },
           update: {
