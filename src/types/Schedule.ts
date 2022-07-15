@@ -53,6 +53,8 @@ export const Schedule = objectType({
           },
         });
 
+        const allCourseInfo = await (prisma as PrismaClient).courseInfo.findMany({});
+
         const courseSections: (Section & {
           course: Course;
           professor: User[];
@@ -61,15 +63,10 @@ export const Schedule = objectType({
           title: string;
         })[] = [];
         courses.forEach((course) => {
-          course.sections.forEach(async (section) => {
-            const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
-              where: {
-                subject_code: {
-                  code: course.code,
-                  subject: course.subject,
-                },
-              },
-            });
+          course.sections.forEach((section) => {
+            const courseInfo = allCourseInfo.find(
+              (info) => info.code === course.code && info.subject === course.subject
+            );
             const courseSection = {
               ...section,
               course,
@@ -82,6 +79,7 @@ export const Schedule = objectType({
             courseSections.push(courseSection);
           });
         });
+
         return courseSections.map(
           ({ course, professor, meetingTimes, startDate, endDate, code, hoursPerWeek, title }) => ({
             CourseID: {
@@ -240,9 +238,9 @@ export const ScheduleMutation = extendType({
           }
 
           // Update courses in the database based on response from algorithm 1
-          updateCourses(generatedSchedule.fallCourses, newFallCourses, 'FALL');
-          updateCourses(generatedSchedule.springCourses, newSpringCourses, 'SPRING');
-          updateCourses(generatedSchedule.summerCourses, newSummerCourses, 'SUMMER');
+          updateCourses(generatedSchedule.fallCourses ?? [], newFallCourses, 'FALL');
+          updateCourses(generatedSchedule.springCourses ?? [], newSpringCourses, 'SPRING');
+          updateCourses(generatedSchedule.summerCourses ?? [], newSummerCourses, 'SUMMER');
         } catch (e) {
           return { success: false, message: (e as Error).message };
         }
@@ -263,7 +261,7 @@ export const ScheduleQuery = extendType({
       args: {
         year: intArg(),
       },
-      resolve: async (__, { year }) => {
+      resolve: async (root, { year }) => {
         const schedule = await (prisma as PrismaClient).schedule.findFirst({
           orderBy: { createdAt: 'desc' },
           where: {

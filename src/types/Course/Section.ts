@@ -55,6 +55,8 @@ export const CourseQuery = extendType({
           },
         });
 
+        const allCourseInfo = await (prisma as PrismaClient).courseInfo.findMany({});
+
         const courseSections: (Section & {
           course: Course;
           professor: PrismaUser[];
@@ -63,14 +65,7 @@ export const CourseQuery = extendType({
           title: string;
         })[] = [];
         courses.forEach(async (course) => {
-          const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
-            where: {
-              subject_code: {
-                code: course.code,
-                subject: course.subject,
-              },
-            },
-          });
+          const courseInfo = allCourseInfo.find((info) => info.code === course.code && info.subject === course.subject);
           course.sections.forEach((section) => {
             const courseSection = {
               ...section,
