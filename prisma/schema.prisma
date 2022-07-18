@@ -52,6 +52,17 @@ model User {
   @@unique([username])
 }
 
+model CourseInfo {
+  subject String
+  code String
+  title String
+  weeklyHours Float
+  sequenceNumber String
+  peng Peng
+  pengTerm Term?
+  @@id([subject, code])
+}
+
 model Course {
   term Term
   year Int
@@ -59,8 +70,6 @@ model Course {
   subject String
   code String
   sections Section[]
-  peng Peng
-  weeklyHours Float?
   capacity Int @default(value: 0)
   schedule Schedule? @relation(fields: [scheduleID], references: [id])
   scheduleID Int?

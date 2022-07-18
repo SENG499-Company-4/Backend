@@ -1,0 +1,223 @@
+[
+  {
+    "subject": "CSC",
+    "code": "111",
+    "sequence": "1A",
+    "title": "Fundamentals of Programming with Engineering Applications",
+    "weeklyHours": 3,
+    "peng": "PREFERRED"
+  },
+  {
+    "subject": "CSC",
+    "code": "115",
+    "sequence": "1B",
+    "title": "Fundamentals of Programming II",
+    "weeklyHours": 3,
+    "peng": "PREFERRED"
+  },
+  {
+    "subject": "CSC",
+    "code": "225",
+    "sequence": "2B",
+    "title": "Algorithms and Data Structures I",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "CSC",
+    "code": "226",
+    "sequence": "3A",
+    "title": "Algorithms and Data Structures II",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "CSC",
+    "code": "230",
+    "sequence": "2A",
+    "title": "Introduction to Computer Architecture",
+    "weeklyHours": 3,
+    "peng": "REQUIRED",
+    "pengTerm": "FALL"
+  },
+  {
+    "subject": "SENG",
+    "code": "265",
+    "sequence": "3A",
+    "title": "Software Development Methods",
+    "weeklyHours": 3,
+    "peng": "REQUIRED",
+    "pengTerm": "FALL"
+  },
+  {
+    "subject": "SENG",
+    "code": "275",
+    "sequence": "2B",
+    "title": "Software Testing",
+    "weeklyHours": 3,
+    "peng": "REQUIRED",
+    "pengTerm": "SUMMER"
+  },
+  {
+    "subject": "CSC",
+    "code": "320",
+    "sequence": "3B",
+    "title": "Foundations of Computer Science",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "CSC",
+    "code": "360",
+    "sequence": "3B",
+    "title": "Operating Systems",
+    "weeklyHours": 3,
+    "peng": "REQUIRED",
+    "pengTerm": "FALL"
+  },
+  {
+    "subject": "CSC",
+    "code": "361",
+    "sequence": "3A",
+    "title": " Computer Communications and Networks",
+    "weeklyHours": 3,
+    "peng": "REQUIRED",
+    "pengTerm": "SPRING"
+  },
+  {
+    "subject": "CSC",
+    "code": "370",
+    "sequence": "3B",
+    "title": "Database Systems",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "310",
+    "sequence": "2B",
+    "title": "Human Computer Interaction",
+    "weeklyHours": 3,
+    "peng": "PREFERRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "321",
+    "sequence": "3A",
+    "title": "Requirements Engineering",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "350",
+    "sequence": "3B",
+    "title": "Software Architecture and Design",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "360",
+    "sequence": "3B",
+    "title": "Security Engineering",
+    "weeklyHours": 3,
+    "peng": "NOTREQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "371",
+    "sequence": "3A",
+    "title": "Software Evolution",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "401",
+    "sequence": "4B",
+    "title": "Social and Professional Issues",
+    "weeklyHours": 3,
+    "peng": "PREFERRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "255",
+    "sequence": "2A",
+    "title": "Introduction to Computer Architecture",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "260",
+    "sequence": "2A",
+    "title": "Continuous-Time Signals and Systems",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "310",
+    "sequence": "2B",
+    "title": "Digital Signal Processing I",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "355",
+    "sequence": "3B",
+    "title": "Microprocessor-Based Systems",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "360",
+    "sequence": "3A",
+    "title": "Control Theory and Systems I",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "455",
+    "sequence": "4B",
+    "title": "Real-Time Computer Systems Design Project",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "ECE",
+    "code": "458",
+    "sequence": "3A",
+    "title": "Communication Networks",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "426",
+    "sequence": "4A",
+    "title": "Software Quality Engineering",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "440",
+    "sequence": "4A",
+    "title": "Embedded Systems",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  },
+  {
+    "subject": "SENG",
+    "code": "499",
+    "sequence": "4A",
+    "title": "Design Project II",
+    "weeklyHours": 3,
+    "peng": "REQUIRED"
+  }
+]
