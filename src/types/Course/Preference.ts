@@ -214,7 +214,6 @@ export const PreferenceMutation = extendType({
                   year: year,
                 },
               });
-              console.log(courseData, subject, code, term, year);
 
               const courseID = courseData ? courseData.id : -1; //if courseData is null set id to -1
 
@@ -225,8 +224,6 @@ export const PreferenceMutation = extendType({
             }
           )
         );
-
-        console.log(preferenceObjs);
 
         for (const preferenceObj of preferenceObjs) {
           await (prisma as PrismaClient).preference.upsert({
