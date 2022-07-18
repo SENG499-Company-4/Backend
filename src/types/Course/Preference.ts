@@ -197,14 +197,24 @@ export const PreferenceMutation = extendType({
               term: Term;
               preference: number;
             }) => {
-              const courseData = await (prisma as PrismaClient).course.findFirst({
+              const courseData = await (prisma as PrismaClient).course.upsert({
                 where: {
+                  subject_code_year_term: {
+                    subject: subject,
+                    code: code,
+                    term: term,
+                    year: year,
+                  },
+                },
+                update: {},
+                create: {
                   subject: subject,
                   code: code,
                   term: term,
                   year: year,
                 },
               });
+              console.log(courseData, subject, code, term, year);
 
               const courseID = courseData ? courseData.id : -1; //if courseData is null set id to -1
 
@@ -215,6 +225,8 @@ export const PreferenceMutation = extendType({
             }
           )
         );
+
+        console.log(preferenceObjs);
 
         for (const preferenceObj of preferenceObjs) {
           await (prisma as PrismaClient).preference.upsert({
