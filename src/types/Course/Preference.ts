@@ -41,7 +41,6 @@ export const CreateTeachingPreferenceInput = inputObjectType({
   definition(t) {
     t.nonNull.boolean('peng');
     t.nonNull.id('userId');
-    t.nonNull.int('year');
     t.nonNull.list.nonNull.field('courses', {
       type: CoursePreferenceInput,
     });
@@ -171,7 +170,6 @@ export const PreferenceMutation = extendType({
           input: {
             peng,
             userId,
-            year,
             courses,
             hasRelief,
             reliefReason,
@@ -203,7 +201,7 @@ export const PreferenceMutation = extendType({
                     subject: subject,
                     code: code,
                     term: term,
-                    year: year,
+                    year: new Date().getFullYear(),
                   },
                 },
                 update: {},
@@ -211,7 +209,7 @@ export const PreferenceMutation = extendType({
                   subject: subject,
                   code: code,
                   term: term,
-                  year: year,
+                  year: new Date().getFullYear(),
                 },
               });
 
@@ -267,7 +265,7 @@ export const PreferenceMutation = extendType({
         await (prisma as PrismaClient).professorSettings.upsert({
           where: {
             year_userID: {
-              year,
+              year: new Date().getFullYear(),
               userID: Number(userId),
             },
           },
@@ -282,7 +280,7 @@ export const PreferenceMutation = extendType({
           },
           create: {
             userID: Number(userId),
-            year: year,
+            year: new Date().getFullYear(),
             maxCoursesFall: fallTermCourses ?? 0,
             maxCoursesSpring: springTermCourses ?? 0,
             maxCoursesSummer: summerTermCourses ?? 0,
