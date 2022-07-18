@@ -104,14 +104,14 @@ type CourseSection {
 
 input CreateTeachingPreferenceInput {
   courses: [CoursePreferenceInput!]!
+  fallTermCourses: Int
   hasRelief: Boolean!
   hasTopic: Boolean!
-  maxFallCapacity: Int!
-  maxSpringCapacity: Int!
-  maxSummerCapacity: Int!
-  nonTeachingTerm: Term!
+  nonTeachingTerm: Term
   peng: Boolean!
   reliefReason: String
+  springTermCourses: Int
+  summerTermCourses: Int
   topicDescription: String
   userId: ID!
   year: Int!

@@ -45,16 +45,16 @@ export const CreateTeachingPreferenceInput = inputObjectType({
     t.nonNull.list.nonNull.field('courses', {
       type: CoursePreferenceInput,
     });
-    t.nonNull.field('nonTeachingTerm', {
+    t.field('nonTeachingTerm', {
       type: TermType,
     });
     t.nonNull.boolean('hasRelief');
     t.string('reliefReason');
     t.nonNull.boolean('hasTopic');
     t.string('topicDescription');
-    t.nonNull.int('maxFallCapacity');
-    t.nonNull.int('maxSpringCapacity');
-    t.nonNull.int('maxSummerCapacity');
+    t.int('fallTermCourses');
+    t.int('springTermCourses');
+    t.int('summerTermCourses');
   },
 });
 
@@ -65,13 +65,15 @@ export const PreferenceQuery = extendType({
       type: TeachingPreferenceSurvey,
       description: 'Get Teaching Preference Survey for the current user',
       resolve: async (_, __, { prisma, token }) => {
-        const prefs = await (prisma as PrismaClient).preference.findMany({
-          where: {
-            user: {
-              id: getUserId(token),
+        const prefs = await Promise.all(
+          await (prisma as PrismaClient).preference.findMany({
+            where: {
+              user: {
+                id: getUserId(token),
+              },
             },
-          },
-        });
+          })
+        );
 
         const courses = await Promise.all(
           prefs.map(async ({ courseID, rank }) => {
@@ -175,9 +177,9 @@ export const PreferenceMutation = extendType({
             reliefReason,
             hasTopic,
             topicDescription,
-            maxFallCapacity,
-            maxSpringCapacity,
-            maxSummerCapacity,
+            fallTermCourses,
+            springTermCourses,
+            summerTermCourses,
           },
         },
         { prisma }
@@ -256,14 +258,14 @@ export const PreferenceMutation = extendType({
         await (prisma as PrismaClient).professorSettings.upsert({
           where: {
             year_userID: {
-              userID: Number(userId),
               year,
+              userID: Number(userId),
             },
           },
           update: {
-            maxCoursesFall: maxFallCapacity,
-            maxCoursesSpring: maxSpringCapacity,
-            maxCoursesSummer: maxSummerCapacity,
+            maxCoursesFall: fallTermCourses ?? 0,
+            maxCoursesSpring: springTermCourses ?? 0,
+            maxCoursesSummer: summerTermCourses ?? 0,
             hasRelief: hasRelief,
             reliefReason: reliefReason ?? '',
             hasTopic: hasTopic,
@@ -272,9 +274,9 @@ export const PreferenceMutation = extendType({
           create: {
             userID: Number(userId),
             year: year,
-            maxCoursesFall: maxFallCapacity,
-            maxCoursesSpring: maxSpringCapacity,
-            maxCoursesSummer: maxSummerCapacity,
+            maxCoursesFall: fallTermCourses ?? 0,
+            maxCoursesSpring: springTermCourses ?? 0,
+            maxCoursesSummer: summerTermCourses ?? 0,
             hasRelief: hasRelief,
             reliefReason: reliefReason ?? '',
             hasTopic: hasTopic,
