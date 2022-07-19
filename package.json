@@ -10,6 +10,7 @@
     "lint": "eslint \"src/**/*.{t,j}s{x,}\"",
     "lint:fix": "eslint --fix \"src/**/*.{t,j}s{x,}\"",
     "format": "prettier --write \"src/**/*.{t,j}s{x,}\"",
+    "schema-test": "./schema_diff.sh",
     "migrate": "npx prisma migrate dev --name init --preview-feature",
     "deploy": "npx prisma migrate deploy",
     "prisma": "prisma generate",
