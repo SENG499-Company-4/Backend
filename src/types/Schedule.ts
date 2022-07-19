@@ -397,6 +397,19 @@ export const ScheduleMutation = extendType({
                 id: courseSection?.id,
               },
               data: {
+                professor: {
+                  set: [],
+                },
+              },
+            });
+
+            console.log('Professors: ', professors);
+
+            await (prisma as PrismaClient).section.update({
+              where: {
+                id: courseSection?.id,
+              },
+              data: {
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
                 meetingTimes: {
