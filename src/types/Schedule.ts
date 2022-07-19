@@ -6,7 +6,7 @@ import { usePost } from '../utils/api';
 import { prisma } from '../context';
 import { createAlgo1Input, createNewCourses, updateCourses } from '../utils/schedule';
 import { Company } from './Company';
-import { CourseInput } from './Course';
+import { CourseInput, MeetingTimeInput } from './Course';
 import { CourseSection } from './Course/Section';
 import { DateType as ScalarDate } from './DateType';
 import { Response } from './Response';
@@ -21,6 +21,65 @@ export const GenerateScheduleInput = inputObjectType({
     t.list.field('summerCourses', { type: nonNull(CourseInput) });
     t.nonNull.field('algorithm1', { type: Company });
     t.nonNull.field('algorithm2', { type: Company });
+  },
+});
+
+export const UpdateScheduleResponse = objectType({
+  name: 'UpdateScheduleResponse',
+  definition(t) {
+    t.nonNull.boolean('success', { description: 'Whether the update was successful' });
+    t.string('message', { description: 'General messaging for the client to consume.' });
+    t.list.nonNull.string('errors', {
+      description:
+        'Errors associated to updating the schedule. Only populated if success is false. This could include validation issues.',
+    });
+  },
+});
+
+export const UpdateScheduleInput = inputObjectType({
+  name: 'UpdateScheduleInput',
+  definition(t) {
+    t.id('id', {
+      description: 'ID of the schedule to update. If not given, the current schedule will be updated.',
+    });
+    t.nonNull.list.field('courses', { type: nonNull(CourseSectionInput), description: 'The updated courses' });
+    t.nonNull.boolean('skipValidation', {
+      description: 'Whether to perform validation on the backend through algorithm 1.',
+    });
+    t.nonNull.field('validation', {
+      type: Company,
+      description:
+        'Which algorithm to use. If COMPANY4 is selected then validation will not be performed regardless of skipValidation.',
+    });
+  },
+});
+
+export const CourseSectionInput = inputObjectType({
+  name: 'CourseSectionInput',
+  definition(t) {
+    t.nonNull.field('id', { type: nonNull(CourseUpdateInput), description: 'The course identifier' });
+    t.nonNull.float('hoursPerWeek', { description: 'How many hours per week a course takes' });
+    t.nonNull.int('capacity', { description: 'Maximum capacity of the section' });
+    t.string('sectionNumber', { description: 'Section number for courses, eg: A01, A02' });
+    t.nonNull.list.nonNull.string('professors', {
+      description: "Professor's info, if any professors are assigned. Usernames",
+    });
+    t.nonNull.date('startDate', { description: 'The start date of the course' });
+    t.nonNull.date('endDate', { description: 'The end date of the course' });
+    t.nonNull.list.field('meetingTimes', {
+      type: nonNull(MeetingTimeInput),
+      description: 'Days of the week the class is offered in - see Day',
+    });
+  },
+});
+
+export const CourseUpdateInput = inputObjectType({
+  name: 'CourseUpdateInput',
+  definition(t) {
+    t.nonNull.string('subject', { description: 'Course subject, e.g. SENG, CSC' });
+    t.nonNull.string('code', { description: 'Course code, e.g. 499, 310' });
+    t.nonNull.string('title', { description: 'Course Title e.g. Introduction to Artificial Intelligence' });
+    t.nonNull.field('term', { type: Term, description: 'Term course is offered in' });
   },
 });
 
@@ -229,6 +288,117 @@ export const ScheduleMutation = extendType({
         }
 
         return { success: true };
+      },
+    });
+    t.nonNull.field('updateSchedule', {
+      type: UpdateScheduleResponse,
+      description: 'Update schedule',
+      args: {
+        input: arg({ type: nonNull(UpdateScheduleInput) }),
+      },
+      resolve: async (_, { input: { id, courses, skipValidation, validation } }) => {
+        if (validation === 'COMPANY3' && !skipValidation) {
+          // TODO: Validate the schedule
+        }
+
+        let schedule = await (prisma as PrismaClient).schedule.findUnique({
+          where: {
+            id: Number(id),
+          },
+        });
+
+        if (!schedule) {
+          schedule = await (prisma as PrismaClient).schedule.findFirst({
+            orderBy: { createdAt: 'desc' },
+            where: {
+              year: (await (prisma as PrismaClient).schedule.findMany({ orderBy: { createdAt: 'desc' } }))[0].year,
+            },
+          });
+        }
+
+        const coursesToUpdate = await (prisma as PrismaClient).course.findMany({
+          where: {
+            scheduleID: schedule?.id,
+          },
+        });
+
+        courses?.forEach(
+          async ({
+            id: { code, subject, term },
+            hoursPerWeek,
+            capacity,
+            sectionNumber,
+            professors,
+            startDate,
+            endDate,
+            meetingTimes,
+          }) => {
+            const course = coursesToUpdate.find(
+              (course) => course.code === code && course.subject === subject && course.term === term
+            );
+
+            const courseSection = await (prisma as PrismaClient).section.findUnique({
+              where: {
+                code_courseId: {
+                  code: sectionNumber ?? '',
+                  courseId: course?.id ?? 0,
+                },
+              },
+            });
+
+            await (prisma as PrismaClient).course.update({
+              where: {
+                id: course?.id,
+              },
+              data: {
+                weeklyHours: hoursPerWeek,
+                capacity,
+              },
+            });
+
+            await (prisma as PrismaClient).meetingTime.deleteMany({
+              where: {
+                sectionCode: courseSection?.code,
+                sectionCourseId: courseSection?.courseId,
+              },
+            });
+
+            await (prisma as PrismaClient).section.update({
+              where: {
+                id: courseSection?.id,
+              },
+              data: {
+                startDate: new Date(startDate),
+                endDate: new Date(endDate),
+                meetingTimes: {
+                  createMany: {
+                    data: meetingTimes.map(({ day, startTime, endTime }) => ({
+                      day,
+                      startTime: new Date(startTime),
+                      endTime: new Date(endTime),
+                    })),
+                  },
+                },
+                professor: {
+                  connectOrCreate: professors.map((profUsername) => ({
+                    where: {
+                      username: profUsername,
+                    },
+                    create: {
+                      username: profUsername,
+                      password: profUsername,
+                    },
+                  })),
+                },
+              },
+            });
+          }
+        );
+
+        return {
+          success: true,
+          message: `Modified schedule with id ${id} for ${schedule?.year} created on ${schedule?.createdAt}`,
+        };
       },
     });
   },
