@@ -1,5 +1,14 @@
-import { enumType, objectType } from 'nexus';
+import { enumType, inputObjectType, objectType } from 'nexus';
 import { DateType } from '../DateType';
+
+export const MeetingTimeInput = inputObjectType({
+  name: 'MeetingTimeInput',
+  definition(t) {
+    t.nonNull.field('day', { type: Day });
+    t.nonNull.date('startTime');
+    t.nonNull.date('endTime');
+  },
+});
 
 export const Day = enumType({
   name: 'Day',
