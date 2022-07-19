@@ -1,10 +1,27 @@
-import { PrismaClient, Term, Peng, Role } from '@prisma/client';
+import { PrismaClient, Term, Role, Peng } from '@prisma/client';
 import { partition, randomNumber } from '../src/utils/helpers';
 import courseData from './static/courses.json';
+import courseInfo from './static/courseInfo.json';
 import userData from './static/users.json';
 const prisma = new PrismaClient();
 
 async function main() {
+  if ((await prisma.courseInfo.count()) === 0) {
+    courseInfo.forEach(async ({ subject, sequence: sequenceNumber, code, peng, pengTerm, weeklyHours, title }) => {
+      await (prisma as PrismaClient).courseInfo.create({
+        data: {
+          subject,
+          code,
+          peng: peng as Peng,
+          pengTerm: pengTerm as Term,
+          sequenceNumber,
+          weeklyHours,
+          title,
+        },
+      });
+    });
+  }
+
   if ((await prisma.course.count()) === 0) {
     for (const courseObj of courseData) {
       await (prisma as PrismaClient).course.create({
@@ -13,9 +30,7 @@ async function main() {
           code: courseObj.code,
           term: courseObj.term as Term,
           year: courseObj.year,
-          weeklyHours: courseObj.weeklyHours,
           capacity: courseObj.capacity,
-          peng: courseObj.peng as Peng,
         },
       });
     }

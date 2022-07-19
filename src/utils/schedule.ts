@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Course, PrismaClient, Term } from '@prisma/client';
+import { Course, CourseInfo, PrismaClient, Term } from '@prisma/client';
 import { prisma } from '../context';
 import { Algo1Course } from './types';
 
@@ -9,15 +9,23 @@ export const createNewCourses = async (
   year: number,
   scheduleId: number
 ) => {
-  const newCourses: (Course & { sectionCount: number })[] = await Promise.all(
+  const newCourses: (Course & { sectionCount: number; courseInfo: CourseInfo | null })[] = await Promise.all(
     courses.map(async ({ subject, code, section }: { subject: string; code: string; section: number }) => {
+      const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
+        where: {
+          subject_code: {
+            subject,
+            code,
+          },
+        },
+      });
+
       const newCourse = await (prisma as PrismaClient).course.upsert({
         create: {
           subject,
           code,
           term,
           year,
-          peng: 'NOTREQUIRED',
           capacity: 0,
           schedule: {
             connect: {
@@ -68,25 +76,23 @@ export const createNewCourses = async (
         },
       });
 
-      return { ...newCourse, sectionCount: section };
+      return { ...newCourse, sectionCount: section, courseInfo };
     })
   );
 
   return newCourses;
 };
 
-export const createAlgo1Input = (courses: (Course & { sectionCount: number })[]) => {
+export const createAlgo1Input = (courses: (Course & { sectionCount: number; courseInfo: CourseInfo | null })[]) => {
   const algo1Courses: Algo1Course[] = [];
-  courses.forEach(({ code, subject, capacity, sectionCount: numSections }) => {
+  courses.forEach(({ code, subject, capacity, sectionCount: numSections, courseInfo }) => {
     algo1Courses.push({
       courseNumber: code,
       subject,
       // sequenceMatter does not matter because algo 1 uses numSections instead
       sequenceNumber: 'A01',
-      // streamSequence also does not matter as far as I know
-      streamSequence: '2A',
-      // TODO: Seed the DB with course titles? Not sure bout this one.
-      courseTitle: 'Calculus',
+      streamSequence: courseInfo?.sequenceNumber ?? '',
+      courseTitle: courseInfo?.title ?? '',
       courseCapacity: capacity,
       numSections,
     });
