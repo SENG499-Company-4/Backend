@@ -121,6 +121,7 @@ export const Schedule = objectType({
           hoursPerWeek: number;
           title: string;
         })[] = [];
+
         courses.forEach((course) => {
           course.sections.forEach((section) => {
             const courseInfo = allCourseInfo.find(
@@ -368,8 +369,19 @@ export const ScheduleMutation = extendType({
                 id: course?.id,
               },
               data: {
-                weeklyHours: hoursPerWeek,
                 capacity,
+              },
+            });
+
+            await (prisma as PrismaClient).courseInfo.update({
+              where: {
+                subject_code: {
+                  subject,
+                  code,
+                },
+              },
+              data: {
+                weeklyHours: hoursPerWeek,
               },
             });
 
