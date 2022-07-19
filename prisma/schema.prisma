@@ -46,42 +46,53 @@ model User {
   role Role @default(value: USER)
   preferences Preference[]
   professorSettings ProfessorSettings[]
-  courses Course[]
+  courses Section[]
   active Boolean @default(value: true)
+  peng Boolean?
 }
 
 model Course {
+  term Term
+  year Int
   id Int @id @default(autoincrement())
   subject String
   code String
-  term Term
-  year Int
-  weeklyHours Float
-  capacity Int?
+  sections Section[]
+  peng Peng
+  weeklyHours Float?
+  capacity Int @default(value: 0)
   startDate DateTime?
   endDate DateTime?
-  peng Peng
+  schedule Schedule? @relation(fields: [scheduleID], references: [id])
+  scheduleID Int?
+  @@unique([subject, code, year, term])
+}
+
+model Section {
   meetingTimes MeetingTime[]
-  professor User @relation(fields: [professorId], references: [id])
-  professorId Int @default(value: 35)
+  code String
+  course Course @relation(fields: [courseId], references: [id])
+  courseId Int
+  @@unique([code, courseId])
+  professor User? @relation(fields: [professorId], references: [id])
+  professorId Int?
 }
 
 model MeetingTime {
   id Int @id @default(autoincrement())
-  course Course @relation(fields: [courseID], references: [id])
-  courseID Int
+  course Section @relation(fields: [sectionCode, sectionCourseId], references: [code, courseId])
+  sectionCode String
+  sectionCourseId Int
   day Day?
   startTime DateTime?
   endTime DateTime?
-  schedule Schedule @relation(fields: [scheduleID], references: [id])
-  scheduleID Int
 }
 
 model Schedule {
   id Int @id @default(autoincrement())
   year Int
   createdAt DateTime
-  meetingTimes MeetingTime[]
+  courses Course[]
 }
 
 model Preference {
@@ -99,4 +110,8 @@ model ProfessorSettings {
   maxCoursesFall Int
   maxCoursesSpring Int
   maxCoursesSummer Int
+  hasRelief Boolean
+  reliefReason String
+  hasTopic Boolean
+  topicDescription String
 }

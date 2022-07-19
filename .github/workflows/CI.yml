@@ -2,7 +2,15 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  REPO_NAME: ${{ github.repository }}
+  IS_PUSH_ON_DEFAULT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
 jobs:
   run-lint:
     runs-on: ubuntu-latest
@@ -12,9 +20,10 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
+
       - name: Install Dependencies
         run: npm install
-        
+
       - name: Run ESLint
         run: npm run lint
 
@@ -29,3 +38,63 @@ jobs:
       # TODO: Run tests when they are available
       #- name: Run Tests
       #  run: npm run test
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    needs: run-lint
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v2
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}
+
+      - name: Create alternate default branch tag
+        id: defaultbranchtag
+        if: ${{ env.IS_PUSH_ON_DEFAULT  == 'true' }}
+        run: |
+          DEFAULT_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}:latest
+          # change all to lowercase
+          DEFAULT_TAG=$(echo $DEFAULT_TAG | tr '[A-Z]' '[a-z]')
+          echo "::set-output name=defaulttag::${DEFAULT_TAG}"
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ env.IS_PUSH_ON_DEFAULT }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}-${{ github.run_id }}
+            ${{ steps.defaultbranchtag.outputs.defaulttag }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            runnumber=${{ github.run_id }}
+  
+  run-integration-tests:
+    runs-on: ubuntu-latest
+    needs: build-docker-image
+    steps:
+      - name: Dispatch event to trigger integration tests
+        uses: peter-evans/repository-dispatch@v2
+        if: ${{ env.IS_PUSH_ON_DEFAULT == 'true' }}
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: seng499-s22-company3/shared
+          event-type: company4-backend
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repo": "company4-backend"}' 
+        

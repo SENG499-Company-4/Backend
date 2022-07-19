@@ -1,5 +1,5 @@
 import { enumType, objectType } from 'nexus';
-import { Date } from '../Date';
+import { DateType } from '../DateType';
 
 export const Day = enumType({
   name: 'Day',
@@ -15,7 +15,7 @@ export const MeetingTime = objectType({
       type: Day,
       description: 'Weekday - see DayEnum',
     });
-    t.nonNull.field('startTime', { description: 'Start time', type: Date });
-    t.nonNull.field('endTime', { description: 'End time', type: Date });
+    t.nonNull.field('startTime', { description: 'Start time', type: DateType });
+    t.nonNull.field('endTime', { description: 'End time', type: DateType });
   },
 });
