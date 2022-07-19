@@ -27,14 +27,6 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-  schema-diff:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Company 4 Schema
-        uses: actions/checkout@v3
-      - name: Compare Schema from Shared Repository
-        run: npm run schema-test
-
       # TODO: Run tests when they are available
       #- name: Run Tests
       #  run: npm run test
