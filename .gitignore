@@ -39,6 +39,11 @@ node_modules/
 .vscode-test
 .vscode
 
+# Schema Test script files
+shared
+c3schema.graphql
+c4schema.graphql
+
 # Build outputs
 dist/
 
