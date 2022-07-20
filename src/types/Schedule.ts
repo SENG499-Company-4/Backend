@@ -45,6 +45,7 @@ export const ScheduleMutation = extendType({
     t.nonNull.field('generateSchedule', {
       type: Response,
       description: 'Generate schedule',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       args: {
         input: arg({ type: nonNull(GenerateScheduleInput) }),
       },
@@ -379,6 +380,7 @@ export const ScheduleQuery = extendType({
       type: Schedule,
       description:
         'Schedule for a given term. If year is given, returns the most recent schedule generated for that year.',
+      authorize: (_, __, ctx) => ctx.auth.isValidUser(ctx.token),
       args: {
         year: intArg(),
       },

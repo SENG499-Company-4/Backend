@@ -4,9 +4,9 @@ export const prisma = new PrismaClient();
 
 // Authentication class
 export class AuthSource {
-  constructor(protected ctx: Context) {}
+  constructor(protected prisma: PrismaClient) {}
 
-  async isUserOrAdmin(token: string | undefined): Promise<boolean> {
+  async isValidUser(token: string | undefined): Promise<boolean> {
     if (!token) return false;
     const exists = await (prisma as PrismaClient).user.findUnique({
       where: {
@@ -46,4 +46,5 @@ export interface Context {
 
 export const context: Context = {
   prisma,
+  auth: new AuthSource(prisma),
 };

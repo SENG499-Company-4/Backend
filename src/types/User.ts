@@ -109,6 +109,7 @@ export const UserMutation = extendType({
     t.nonNull.field('createUser', {
       type: CreateUserMutationResult,
       description: 'Register a new user account',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       args: {
         input: arg({ type: nonNull(CreateUserInput) }),
       },
@@ -179,6 +180,7 @@ export const UserMutation = extendType({
     t.field('updateUser', {
       type: UpdateUserMutationResult,
       description: 'Updates a user given the user id.',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.input.id)),
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
@@ -211,6 +213,7 @@ export const UserMutation = extendType({
         if (!user) return { success: false, message: 'User not found' };
 
         const isValid = await compare(currentPassword, user.password);
+        console.log(user.password);
         if (!isValid) return { success: false, message: 'Invalid current password' };
 
         await (prisma as PrismaClient).user.update({
@@ -228,7 +231,7 @@ export const UserMutation = extendType({
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
       description: 'Reset a users password.',
-      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.id)),
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.id)) || ctx.auth.isAdmin(ctx.token),
       args: {
         id: nonNull(idArg()),
       },
@@ -251,6 +254,7 @@ export const UserQuery = extendType({
     t.field('findUserById', {
       type: User,
       description: 'Find a user by their id',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       args: {
         id: nonNull(intArg()),
       },
@@ -265,6 +269,7 @@ export const UserQuery = extendType({
     t.field('allUsers', {
       type: list(nonNull(User)),
       description: 'Get all users',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       resolve: async (_, __, { prisma }) => {
         return await (prisma as PrismaClient).user.findMany();
       },
