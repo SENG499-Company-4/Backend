@@ -4,7 +4,7 @@ export const prisma = new PrismaClient();
 
 // Authentication class
 export class AuthSource {
-  constructor(protected prisma: PrismaClient) {}
+  constructor() {}
 
   async isValidUser(token: string | undefined): Promise<boolean> {
     if (!token) return false;
@@ -46,5 +46,5 @@ export interface Context {
 
 export const context: Context = {
   prisma,
-  auth: new AuthSource(prisma),
+  auth: new AuthSource(),
 };
