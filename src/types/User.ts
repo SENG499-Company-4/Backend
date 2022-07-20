@@ -96,6 +96,25 @@ export const User = objectType({
     t.list.nonNull.field('preferences', {
       type: CoursePreference,
       description: 'Teaching preferences',
+      resolve: async ({ id }, _, { prisma }) => {
+        const dBpreferences = await (prisma as PrismaClient).preference.findMany({
+          where: {
+            userID: id,
+          },
+        });
+
+        return dBpreferences.map(
+          ({ courseCode: code, courseSubject: subject, courseTerm: term, courseYear: year, rank }) => ({
+            id: {
+              code,
+              subject,
+              term,
+              year,
+            },
+            preference: rank ?? 0,
+          })
+        );
+      },
     });
     t.nonNull.boolean('active', {
       description: 'Determine if the user is marked active',
