@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { arg, enumType, extendType, idArg, inputObjectType, intArg, list, nonNull, objectType, stringArg } from 'nexus';
@@ -103,16 +104,30 @@ export const User = objectType({
           },
         });
 
-        return dBpreferences.map(
-          ({ courseCode: code, courseSubject: subject, courseTerm: term, courseYear: year, rank }) => ({
-            id: {
-              code,
-              subject,
-              term,
-              year,
-            },
-            preference: rank ?? 0,
-          })
+        return await Promise.all(
+          dBpreferences.map(
+            async ({ courseCode: code, courseSubject: subject, courseTerm: term, courseYear: year, rank }) => {
+              const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
+                where: {
+                  subject_code: {
+                    subject,
+                    code,
+                  },
+                },
+              });
+
+              return {
+                id: {
+                  code,
+                  subject,
+                  term,
+                  year,
+                  title: courseInfo?.title ?? '',
+                },
+                preference: rank ?? 0,
+              };
+            }
+          )
         );
       },
     });
