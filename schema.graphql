@@ -61,6 +61,18 @@ type CoursePreference {
   preference: Int!
 }
 
+input CoursePreferenceInput {
+  """Course code, e.g. 499, 310"""
+  code: String!
+  preference: Int!
+
+  """Course subject, e.g. SENG, CSC"""
+  subject: String!
+
+  """Term course is offered in"""
+  term: Term!
+}
+
 """
 A set of CourseSections with matching CourseID represent a course offering
 """
@@ -88,6 +100,20 @@ type CourseSection {
 
   """The start date of the course"""
   startDate: Date!
+}
+
+input CreateTeachingPreferenceInput {
+  courses: [CoursePreferenceInput!]!
+  fallTermCourses: Int
+  hasRelief: Boolean!
+  hasTopic: Boolean!
+  nonTeachingTerm: Term
+  peng: Boolean!
+  reliefReason: String
+  springTermCourses: Int
+  summerTermCourses: Int
+  topicDescription: String
+  userId: ID!
 }
 
 input CreateUserInput {
@@ -147,6 +173,9 @@ type Mutation {
   """Change the password of the currently logged in user"""
   changeUserPassword(input: ChangeUserPasswordInput!): Response!
 
+  """Teaching preferences"""
+  createTeachingPreference(input: CreateTeachingPreferenceInput!): Response!
+
   """Register a new user account"""
   createUser(input: CreateUserInput!): CreateUserMutationResult!
 
@@ -169,6 +198,9 @@ type Mutation {
 type Query {
   """Get all users"""
   allUsers: [User!]
+
+  """Get all courses preferences"""
+  coursePreferences: [CoursePreference!]
 
   """Get a list of courses for a given term and/or year"""
   courses(term: Term, year: Int): [CourseSection!]
