@@ -213,7 +213,6 @@ export const UserMutation = extendType({
         if (!user) return { success: false, message: 'User not found' };
 
         const isValid = await compare(currentPassword, user.password);
-        console.log(user.password);
         if (!isValid) return { success: false, message: 'Invalid current password' };
 
         await (prisma as PrismaClient).user.update({
