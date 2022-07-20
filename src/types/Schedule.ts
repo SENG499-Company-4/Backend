@@ -403,8 +403,6 @@ export const ScheduleMutation = extendType({
               },
             });
 
-            console.log('Professors: ', professors);
-
             await (prisma as PrismaClient).section.update({
               where: {
                 id: courseSection?.id,
