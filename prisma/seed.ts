@@ -40,8 +40,9 @@ async function main() {
 
   if ((await prisma.user.count()) === 0) {
     for (const userObj of userData) {
-      const preferences = courses.map((__, i) => ({
-        courseID: i + 1,
+      const dbCourses = await (prisma as PrismaClient).course.findMany();
+      const preferences = dbCourses.map(({ id: courseID }) => ({
+        courseID,
         rank: randomNumber(6),
       }));
 
