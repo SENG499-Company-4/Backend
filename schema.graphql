@@ -154,7 +154,7 @@ input CreateTeachingPreferenceInput {
   summerTermCourses: Int
   topicDescription: String
   userId: ID!
- }
+}
 
 input CreateUserInput {
   name: String
