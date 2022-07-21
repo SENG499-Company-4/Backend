@@ -8,7 +8,7 @@ import { createAlgo1Input, createNewCourses, updateCourses } from '../utils/sche
 import { Company } from './Company';
 import { CourseInput, MeetingTimeInput } from './Course';
 import { CourseSection } from './Course/Section';
-import { DateType as ScalarDate } from './DateType';
+import { DateType, DateType as ScalarDate } from './DateType';
 import { Response } from './Response';
 import { Term } from './Term';
 
@@ -64,8 +64,8 @@ export const CourseSectionInput = inputObjectType({
     t.nonNull.list.nonNull.string('professors', {
       description: "Professor's info, if any professors are assigned. Usernames",
     });
-    t.nonNull.date('startDate', { description: 'The start date of the course' });
-    t.nonNull.date('endDate', { description: 'The end date of the course' });
+    t.nonNull.field('startDate', { description: 'The start date of the course', type: DateType });
+    t.nonNull.field('endDate', { description: 'The end date of the course', type: DateType });
     t.nonNull.list.field('meetingTimes', {
       type: nonNull(MeetingTimeInput),
       description: 'Days of the week the class is offered in - see Day',

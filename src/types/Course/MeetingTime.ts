@@ -5,8 +5,8 @@ export const MeetingTimeInput = inputObjectType({
   name: 'MeetingTimeInput',
   definition(t) {
     t.nonNull.field('day', { type: Day });
-    t.nonNull.date('startTime');
-    t.nonNull.date('endTime');
+    t.nonNull.field('startTime', { type: DateType });
+    t.nonNull.field('endTime', { type: DateType });
   },
 });
 
