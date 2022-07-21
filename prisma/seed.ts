@@ -22,8 +22,10 @@ async function main() {
     });
   }
 
+  const courses = courseData.filter(({ year, term }) => year === 2021 && term === 'FALL');
+
   if ((await prisma.course.count()) === 0) {
-    for (const courseObj of courseData) {
+    for (const courseObj of courses) {
       await (prisma as PrismaClient).course.create({
         data: {
           subject: courseObj.subject,
@@ -38,7 +40,7 @@ async function main() {
 
   if ((await prisma.user.count()) === 0) {
     for (const userObj of userData) {
-      const preferences = courseData.map((__, i) => ({
+      const preferences = courses.map((__, i) => ({
         courseID: i + 1,
         rank: randomNumber(6),
       }));

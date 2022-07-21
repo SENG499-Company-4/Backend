@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { arg, enumType, extendType, idArg, inputObjectType, intArg, list, nonNull, objectType, stringArg } from 'nexus';
@@ -96,6 +97,39 @@ export const User = objectType({
     t.list.nonNull.field('preferences', {
       type: CoursePreference,
       description: 'Teaching preferences',
+      resolve: async ({ id }, _, { prisma }) => {
+        const dBpreferences = await (prisma as PrismaClient).preference.findMany({
+          where: {
+            userID: id,
+          },
+        });
+
+        return await Promise.all(
+          dBpreferences.map(
+            async ({ courseCode: code, courseSubject: subject, courseTerm: term, courseYear: year, rank }) => {
+              const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
+                where: {
+                  subject_code: {
+                    subject,
+                    code,
+                  },
+                },
+              });
+
+              return {
+                id: {
+                  code,
+                  subject,
+                  term,
+                  year,
+                  title: courseInfo?.title ?? '',
+                },
+                preference: rank ?? 0,
+              };
+            }
+          )
+        );
+      },
     });
     t.nonNull.boolean('active', {
       description: 'Determine if the user is marked active',
