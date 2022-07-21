@@ -40,6 +40,22 @@ export interface NexusGenInputs {
     subject: string; // String!
     term: NexusGenEnums['Term']; // Term!
   }
+  CourseSectionInput: { // input type
+    capacity: number; // Int!
+    endDate: NexusGenScalars['Date']; // Date!
+    hoursPerWeek: number; // Float!
+    id: NexusGenInputs['CourseUpdateInput']; // CourseUpdateInput!
+    meetingTimes: NexusGenInputs['MeetingTimeInput'][]; // [MeetingTimeInput!]!
+    professors: string[]; // [String!]!
+    sectionNumber?: string | null; // String
+    startDate: NexusGenScalars['Date']; // Date!
+  }
+  CourseUpdateInput: { // input type
+    code: string; // String!
+    subject: string; // String!
+    term: NexusGenEnums['Term']; // Term!
+    title: string; // String!
+  }
   CreateTeachingPreferenceInput: { // input type
     courses: NexusGenInputs['CoursePreferenceInput'][]; // [CoursePreferenceInput!]!
     fallTermCourses?: number | null; // Int
@@ -66,6 +82,17 @@ export interface NexusGenInputs {
     springCourses?: NexusGenInputs['CourseInput'][] | null; // [CourseInput!]
     summerCourses?: NexusGenInputs['CourseInput'][] | null; // [CourseInput!]
     year: number; // Int!
+  }
+  MeetingTimeInput: { // input type
+    day: NexusGenEnums['Day']; // Day!
+    endTime: NexusGenScalars['Date']; // Date!
+    startTime: NexusGenScalars['Date']; // Date!
+  }
+  UpdateScheduleInput: { // input type
+    courses: NexusGenInputs['CourseSectionInput'][]; // [CourseSectionInput!]!
+    id?: string | null; // ID
+    skipValidation: boolean; // Boolean!
+    validation: NexusGenEnums['Company']; // Company!
   }
   UpdateUserInput: { // input type
     active?: boolean | null; // Boolean
@@ -152,6 +179,11 @@ export interface NexusGenObjects {
   TeachingPreferenceSurvey: { // root type
     courses: NexusGenRootTypes['CoursePreference'][]; // [CoursePreference!]!
   }
+  UpdateScheduleResponse: { // root type
+    errors?: string[] | null; // [String!]
+    message?: string | null; // String
+    success: boolean; // Boolean!
+  }
   UpdateUserMutationResult: { // root type
     errors?: NexusGenRootTypes['Error'][] | null; // [Error!]
     user?: NexusGenRootTypes['User'] | null; // User
@@ -226,6 +258,7 @@ export interface NexusGenFieldTypes {
     login: NexusGenRootTypes['AuthPayload']; // AuthPayload!
     logout: NexusGenRootTypes['AuthPayload']; // AuthPayload!
     resetPassword: NexusGenRootTypes['ResetPasswordMutationResult']; // ResetPasswordMutationResult!
+    updateSchedule: NexusGenRootTypes['UpdateScheduleResponse']; // UpdateScheduleResponse!
     updateUser: NexusGenRootTypes['UpdateUserMutationResult'] | null; // UpdateUserMutationResult
   }
   Query: { // field return type
@@ -254,6 +287,11 @@ export interface NexusGenFieldTypes {
   }
   TeachingPreferenceSurvey: { // field return type
     courses: NexusGenRootTypes['CoursePreference'][]; // [CoursePreference!]!
+  }
+  UpdateScheduleResponse: { // field return type
+    errors: string[] | null; // [String!]
+    message: string | null; // String
+    success: boolean; // Boolean!
   }
   UpdateUserMutationResult: { // field return type
     errors: NexusGenRootTypes['Error'][] | null; // [Error!]
@@ -320,6 +358,7 @@ export interface NexusGenFieldTypeNames {
     login: 'AuthPayload'
     logout: 'AuthPayload'
     resetPassword: 'ResetPasswordMutationResult'
+    updateSchedule: 'UpdateScheduleResponse'
     updateUser: 'UpdateUserMutationResult'
   }
   Query: { // field return type name
@@ -348,6 +387,11 @@ export interface NexusGenFieldTypeNames {
   }
   TeachingPreferenceSurvey: { // field return type name
     courses: 'CoursePreference'
+  }
+  UpdateScheduleResponse: { // field return type name
+    errors: 'String'
+    message: 'String'
+    success: 'Boolean'
   }
   UpdateUserMutationResult: { // field return type name
     errors: 'Error'
@@ -384,6 +428,9 @@ export interface NexusGenArgTypes {
     }
     resetPassword: { // args
       id: string; // ID!
+    }
+    updateSchedule: { // args
+      input: NexusGenInputs['UpdateScheduleInput']; // UpdateScheduleInput!
     }
     updateUser: { // args
       input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
