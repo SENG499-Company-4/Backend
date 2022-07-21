@@ -1,5 +1,11 @@
 [
   {
+    "name": "TBD",
+    "username": "TBD",
+    "password": "whatever",
+    "role": "USER"
+  },
+  {
     "name": "Daniel Hoffman",
     "username": "dhoffman",
     "password": "$2b$10$tDsA4Ts.DSi4Ry9DoxxQHOS.5ethLRqEFsCO9shyPDefKNaQYXahS",

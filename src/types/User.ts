@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { arg, enumType, extendType, idArg, inputObjectType, intArg, list, nonNull, objectType, stringArg } from 'nexus';
@@ -96,6 +97,39 @@ export const User = objectType({
     t.list.nonNull.field('preferences', {
       type: CoursePreference,
       description: 'Teaching preferences',
+      resolve: async ({ id }, _, { prisma }) => {
+        const dBpreferences = await (prisma as PrismaClient).preference.findMany({
+          where: {
+            userID: id,
+          },
+        });
+
+        return await Promise.all(
+          dBpreferences.map(
+            async ({ courseCode: code, courseSubject: subject, courseTerm: term, courseYear: year, rank }) => {
+              const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
+                where: {
+                  subject_code: {
+                    subject,
+                    code,
+                  },
+                },
+              });
+
+              return {
+                id: {
+                  code,
+                  subject,
+                  term,
+                  year,
+                  title: courseInfo?.title ?? '',
+                },
+                preference: rank ?? 0,
+              };
+            }
+          )
+        );
+      },
     });
     t.nonNull.boolean('active', {
       description: 'Determine if the user is marked active',
@@ -109,6 +143,7 @@ export const UserMutation = extendType({
     t.nonNull.field('createUser', {
       type: CreateUserMutationResult,
       description: 'Register a new user account',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       args: {
         input: arg({ type: nonNull(CreateUserInput) }),
       },
@@ -179,6 +214,7 @@ export const UserMutation = extendType({
     t.field('updateUser', {
       type: UpdateUserMutationResult,
       description: 'Updates a user given the user id.',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.input.id)),
       args: {
         input: arg({ type: nonNull(UpdateUserInput) }),
       },
@@ -199,6 +235,7 @@ export const UserMutation = extendType({
     t.nonNull.field('changeUserPassword', {
       type: Response,
       description: 'Change the password of the currently logged in user',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, args.input.id),
       args: {
         input: arg({ type: nonNull(ChangeUserPasswordInput) }),
       },
@@ -227,6 +264,7 @@ export const UserMutation = extendType({
     t.nonNull.field('resetPassword', {
       type: ResetPasswordMutationResult,
       description: 'Reset a users password.',
+      authorize: (_, args, ctx) => ctx.auth.isCurrentUser(ctx.token, Number(args.id)) || ctx.auth.isAdmin(ctx.token),
       args: {
         id: nonNull(idArg()),
       },
@@ -249,6 +287,7 @@ export const UserQuery = extendType({
     t.field('findUserById', {
       type: User,
       description: 'Find a user by their id',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       args: {
         id: nonNull(intArg()),
       },
@@ -263,6 +302,7 @@ export const UserQuery = extendType({
     t.field('allUsers', {
       type: list(nonNull(User)),
       description: 'Get all users',
+      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
       resolve: async (_, __, { prisma }) => {
         return await (prisma as PrismaClient).user.findMany();
       },
