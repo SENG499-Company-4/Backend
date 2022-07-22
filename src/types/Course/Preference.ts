@@ -290,6 +290,18 @@ export const PreferenceMutation = extendType({
             topicDescription: topicDescription ?? '',
           },
         });
+
+        // As per the frontend's request, they want to be able to delete preferences
+        // This is kinda jank but it'll do
+        if (courses.length === 0) {
+          await (prisma as PrismaClient).preference.deleteMany({
+            where: {
+              userID: Number(userId),
+              courseYear: new Date().getFullYear(),
+            },
+          });
+        }
+
         return { success: true, message: 'Preferences Added' };
       },
     });

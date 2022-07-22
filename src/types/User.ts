@@ -287,7 +287,7 @@ export const UserQuery = extendType({
     t.field('findUserById', {
       type: User,
       description: 'Find a user by their id',
-      authorize: (_, __, ctx) => ctx.auth.isAdmin(ctx.token),
+      authorize: (_, __, ctx) => ctx.auth.isValidUser(ctx.token),
       args: {
         id: nonNull(intArg()),
       },
