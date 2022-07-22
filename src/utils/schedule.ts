@@ -106,7 +106,8 @@ export const updateCourses = (
   newCourses: (Course & {
     sectionCount: number;
   })[],
-  term: Term
+  term: Term,
+  year: number
 ) => {
   courses.forEach(async ({ sequenceNumber: code, courseNumber, subject, assignment, prof }) => {
     // Match our new courses to the courses returned from algorithm 1
@@ -179,6 +180,11 @@ export const updateCourses = (
       },
     });
 
+    const startDateObj = new Date(startDate) ?? new Date();
+    startDateObj.setFullYear(year);
+    const endDateObj = new Date(endDate) ?? new Date();
+    endDateObj.setFullYear(year);
+
     // Update the section with the new meeting times and start/end date
     await (prisma as PrismaClient).section.upsert({
       where: {
@@ -194,8 +200,8 @@ export const updateCourses = (
             id: course.id,
           },
         },
-        startDate: new Date(startDate) ?? new Date(),
-        endDate: new Date(endDate) ?? new Date(),
+        startDate: startDateObj,
+        endDate: endDateObj,
         professor: {
           connect: {
             username: prof?.displayName,

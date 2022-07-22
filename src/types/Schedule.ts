@@ -299,9 +299,9 @@ export const ScheduleMutation = extendType({
           }
 
           // Update courses in the database based on response from algorithm 1
-          updateCourses(generatedSchedule.fallCourses ?? [], newFallCourses, 'FALL');
-          updateCourses(generatedSchedule.springCourses ?? [], newSpringCourses, 'SPRING');
-          updateCourses(generatedSchedule.summerCourses ?? [], newSummerCourses, 'SUMMER');
+          updateCourses(generatedSchedule.fallCourses ?? [], newFallCourses, 'FALL', year);
+          updateCourses(generatedSchedule.springCourses ?? [], newSpringCourses, 'SPRING', year);
+          updateCourses(generatedSchedule.summerCourses ?? [], newSummerCourses, 'SUMMER', year);
         } catch (e) {
           return { success: false, message: (e as Error).message };
         }
