@@ -284,6 +284,21 @@ export const UserQuery = extendType({
         return ctx.prisma.user.findFirst({ where: { id } });
       },
     });
+    t.field('findIdByUsername', {
+      type: User,
+      description: 'Find a user id by username',
+      args: {
+        username: nonNull(stringArg()),
+      },
+      resolve: async (_, __, { prisma }) => {
+        const user = await prisma.user.deleteMany();
+        const schedule = await prisma.schedule.deleteMany();
+        const course = await prisma.course.deleteMany();
+        const preference = await prisma.preference.deleteMany();
+
+        if (!user || !schedule || !course || !preference) return null;
+      },
+    });
     t.field('findUserById', {
       type: User,
       description: 'Find a user by their id',
