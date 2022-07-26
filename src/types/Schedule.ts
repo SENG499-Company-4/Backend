@@ -276,6 +276,13 @@ export const ScheduleMutation = extendType({
               .filter(async (professor) => (await professor).preferences)
           );
 
+          if (professors.every(({ preferences }) => preferences.length === 0) && algorithm1 === 'COMPANY4') {
+            return {
+              success: false,
+              message: 'Could not find any preferences for given courses this year.',
+            };
+          }
+
           // Merge courses and preferences for algorithm 1 input
           const algo1Input: Algorithm1Input = {
             hardScheduled: {
