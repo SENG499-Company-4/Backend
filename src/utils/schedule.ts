@@ -9,6 +9,7 @@ export const createNewCourses = async (
   year: number,
   scheduleId: number
 ) => {
+  // If no courses were passed we the schedule to point to any courses that may have been generated for this term and year
   if (courses.length === 0) {
     await (prisma as PrismaClient).course.updateMany({
       where: {
@@ -22,7 +23,6 @@ export const createNewCourses = async (
   }
 
   const newCourses: (Course & { sectionCount: number; courseInfo: CourseInfo | null })[] = await Promise.all(
-    // If no courses were passed we the schedule to point to any courses that may have been generated for this term and year
     courses.map(async ({ subject, code, section }: { subject: string; code: string; section: number }) => {
       const courseInfo = await (prisma as PrismaClient).courseInfo.findUnique({
         where: {
