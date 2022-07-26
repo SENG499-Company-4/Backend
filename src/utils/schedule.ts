@@ -101,6 +101,57 @@ export const createAlgo1Input = (courses: (Course & { sectionCount: number; cour
   return algo1Courses;
 };
 
+const getCourseRangeDate = (type: 'start' | 'end', term: Term, year: number): Date => {
+  let month, day;
+  if (term === 'FALL') {
+    if (type === 'start') {
+      month = 9;
+      if (year === 2021) day = 6;
+      if (year === 2022) day = 5;
+      if (year === 2023) day = 4;
+      if (year === 2024) day = 2;
+    } else if (type === 'end') {
+      month = 12;
+      if (year === 2021) day = 3;
+      if (year === 2022) day = 2;
+      if (year === 2023) day = 1;
+      if (year === 2024) day = 6;
+    }
+  } else if (term === 'SPRING') {
+    if (type === 'start') {
+      month = 1;
+      if (year === 2021) day = 4;
+      if (year === 2022) day = 3;
+      if (year === 2023) day = 2;
+      if (year === 2024) day = 1;
+    } else if (type === 'end') {
+      month = 4;
+      if (year === 2021) day = 2;
+      if (year === 2022) day = 1;
+      if (year === 2023) day = 7;
+      if (year === 2024) day = 5;
+    }
+  } else if (term === 'SUMMER') {
+    if (type === 'start') {
+      month = 5;
+      if (year === 2021) day = 3;
+      if (year === 2022) day = 2;
+      if (year === 2023) day = 1;
+      if (year === 2024) day = 6;
+    } else if (type === 'end') {
+      month = 8;
+      if (year === 2021) day = 6;
+      if (year === 2022) day = 5;
+      if (year === 2023) day = 4;
+      if (year === 2024) day = 2;
+    }
+  }
+
+  const result = new Date(`${month}/${day}/${year}`);
+
+  return result;
+};
+
 export const updateCourses = (
   courses: Algo1Course[],
   newCourses: (Course & {
@@ -180,11 +231,6 @@ export const updateCourses = (
       },
     });
 
-    const startDateObj = new Date(startDate) ?? new Date();
-    startDateObj.setFullYear(year);
-    const endDateObj = new Date(endDate) ?? new Date();
-    endDateObj.setFullYear(year);
-
     // Update the section with the new meeting times and start/end date
     await (prisma as PrismaClient).section.upsert({
       where: {
@@ -200,8 +246,8 @@ export const updateCourses = (
             id: course.id,
           },
         },
-        startDate: startDateObj,
-        endDate: endDateObj,
+        startDate: getCourseRangeDate('start', term, year),
+        endDate: getCourseRangeDate('end', term, year),
         professor: {
           connect: {
             username: prof?.displayName,
